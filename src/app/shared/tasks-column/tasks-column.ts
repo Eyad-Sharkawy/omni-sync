@@ -8,7 +8,6 @@ type columnTypes = "todo" | "inprog" | "review" | "done";
   templateUrl: './tasks-column.html',
   styleUrl: './tasks-column.css',
   host: {
-    class: "relative flex flex-col gap-0 bg-surface border-border border-1 rounded-xl before:absolute before:top-0 before:left-0 before:h-[3px] before:w-full before:rounded-t-xl",
     "[class]": "'before:bg-' + columnType()"
   }
 })
