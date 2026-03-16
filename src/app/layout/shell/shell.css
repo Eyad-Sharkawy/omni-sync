@@ -1,6 +1,63 @@
 @reference "../../../styles.css";
 
 :host {
-  @apply flex-1 flex;
+  @apply relative isolate flex-1 flex;
+  background-color: var(--color-bg);
+  background-image: linear-gradient(rgba(108, 99, 255, 0.1) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(108, 99, 255, 0.1) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center;
 }
 
+:host::before {
+  content: "";
+  @apply absolute inset-0 pointer-events-none;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14, 14, 16, 0) 0%, rgba(14, 14, 16, 0.65) 100%);
+  z-index: 0;
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: blobFloat 8s ease-in-out infinite;
+}
+
+.blob.blob-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.18), transparent 70%);
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+
+.blob.blob-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(84, 160, 255, 0.12), transparent 70%);
+  top: 200px;
+  right: 10%;
+  animation-delay: -3s;
+}
+
+.blob.blob-3 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(29, 209, 161, 0.10), transparent 70%);
+  top: 300px;
+  left: 8%;
+  animation-delay: -5s;
+}
+
+
+@keyframes blobFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(-50%);
+  }
+
+  50% {
+    transform: translateY(-24px) translateX(-50%);
+  }
+}
