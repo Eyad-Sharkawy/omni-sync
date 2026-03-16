@@ -1,6 +1,6 @@
 import {Component, input} from '@angular/core';
 
-type Priority = "low" | "mid" | "high";
+type Priority = "low" | "medium" | "high";
 
 @Component({
   selector: 'os-task-card',
@@ -13,13 +13,13 @@ export class TaskCard {
 
   priorityBgClass: Record<Priority, string> =  {
     low: "bg-priority-low",
-    mid: "bg-priority-mid",
+    medium: "bg-priority-mid",
     high: "bg-priority-high",
   };
 
   priorityTextClass: Record<Priority, string> = {
     low: "text-priority-low",
-    mid: "text-priority-mid",
+    medium: "text-priority-mid",
     high: "text-priority-high",
   };
 }
