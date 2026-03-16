@@ -1,10 +1,11 @@
-import {Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 
 import {OmniSyncColors} from '../../UI/colors';
 
 @Component({
   selector: 'os-task-meta-tag',
   imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './task-meta-tag.html',
   styleUrl: './task-meta-tag.css',
   host: {

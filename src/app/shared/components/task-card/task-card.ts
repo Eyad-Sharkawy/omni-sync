@@ -1,10 +1,11 @@
-import {Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 type Priority = "low" | "medium" | "high";
 
 @Component({
   selector: 'os-task-card',
   imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './task-card.html',
   styleUrl: './task-card.css',
 })

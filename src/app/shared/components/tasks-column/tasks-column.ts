@@ -1,10 +1,11 @@
-import {Component, computed, input, numberAttribute} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, numberAttribute} from '@angular/core';
 import {OmniSyncColors} from '../../UI/colors';
 
 
 @Component({
   selector: 'os-tasks-column',
   imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tasks-column.html',
   styleUrl: './tasks-column.css',
   host: {

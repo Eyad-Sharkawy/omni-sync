@@ -1,6 +1,5 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {Shell} from './layout/shell/shell';
-import {Kanban} from './features/kanban/kanban';
 
 export const routes: Routes = [
   {
@@ -10,7 +9,8 @@ export const routes: Routes = [
   },
   {
     path: "kanban",
-    component: Kanban,
+    loadComponent: () =>
+      import("./features/kanban/kanban").then((m) => m.Kanban),
     title: "Kanban",
   }
 ];
