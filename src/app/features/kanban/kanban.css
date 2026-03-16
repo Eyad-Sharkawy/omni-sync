@@ -1,5 +1,11 @@
 @reference "../../../styles.css";
 
 :host {
-  @apply flex-1 flex min-h-0 min-w-0 overflow-hidden overflow-x-auto px-8 py-9;
+  @apply relative isolate flex-1 flex min-h-0 min-w-0 overflow-hidden overflow-x-auto px-8 py-9;
+}
+
+:host::before {
+  @apply absolute inset-0 pointer-events-none z-0;
+  content: "";
+  background-image: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PScwIDAgMjU2IDI1NicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48ZmlsdGVyIGlkPSdub2lzZSc+PGZlVHVyYnVsZW5jZSB0eXBlPSdmcmFjdGFsTm9pc2UnIGJhc2VGcmVxdWVuY3k9JzAuOScgbnVtT2N0YXZlcz0nNCcgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIGZpbHRlcj0ndXJsKCNub2lzZSknIG9wYWNpdHk9JzAuMDQnLz48L3N2Zz4=");
 }
