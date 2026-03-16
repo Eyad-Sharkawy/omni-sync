@@ -1,0 +1,40 @@
+  <main class="grid grid-flow-col auto-cols-[280px] grid-rows-[minmax(0,1fr)] gap-5 h-full w-max min-w-full">
+    <os-tasks-column class="" columnType="todo" numberOfTasks="7">
+      <ng-container ngProjectAs="[columnTitle]">To do</ng-container>
+
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+    </os-tasks-column>
+
+    <os-tasks-column columnType="inprog" numberOfTasks="6">
+      <ng-container ngProjectAs="[columnTitle]">In progress</ng-container>
+
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+    </os-tasks-column>
+
+    <os-tasks-column columnType="review" numberOfTasks="3">
+      <ng-container ngProjectAs="[columnTitle]">In Review</ng-container>
+
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+    </os-tasks-column>
+
+    <os-tasks-column columnType="done" numberOfTasks="3">
+      <ng-container ngProjectAs="[columnTitle]">Done</ng-container>
+
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+      <os-task-card></os-task-card>
+    </os-tasks-column>
+  </main>

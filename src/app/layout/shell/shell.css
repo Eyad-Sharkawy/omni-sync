@@ -1,0 +1,6 @@
+@reference "../../../styles.css";
+
+:host {
+  @apply flex-1 flex;
+}
+

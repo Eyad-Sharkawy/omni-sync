@@ -19,16 +19,74 @@
   --color-muted: #44445a;
   --color-primary: #f0f0f5;
   --color-secondary: #7a7a90;
-  --color-border: #2a2a35;;
+  --color-border: #2a2a35;
+
+  --color-priority-low: #1dd1a1;
+  --color-priority-mid: #ff9f43;
+  --color-priority-high: #ff6b6b;
+
 
   --shadow-todo: 0 0 8px #6c63ff;
   --shadow-inprog: 0 0 8px #ff9f43;
   --shadow-review: 0 0 8px #54a0ff;
   --shadow-done: 0 0 8px #1dd1a1;
+
+  --shadow-btn-glow: 0 4px 24px rgba(108, 99, 255, 0.4);
+
+  /*Meta Tags colors*/
+  --color-meta-tag-violet: #6c63ff;
+  --color-meta-tag-lavender: #a78bfa;
+  --color-meta-tag-grape: #9333ea;
+  --color-meta-tag-indigo: #6366f1;
+
+  --color-meta-tag-amber: #ff9f43;
+  --color-meta-tag-coral: #ff6b6b;
+  --color-meta-tag-rose: #f43f5e;
+  --color-meta-tag-tomato: #ff4757;
+
+  --color-meta-tag-sky: #54a0ff;
+  --color-meta-tag-cyan: #22d3ee;
+  --color-meta-tag-cerulean: #0ea5e9;
+  --color-meta-tag-teal: #2dd4bf;
+
+  --color-meta-tag-mint: #1dd1a1;
+  --color-meta-tag-emerald: #10b981;
+  --color-meta-tag-lime: #84cc16;
+  --color-meta-tag-sage: #4ade80;
+
+  --color-meta-tag-slate: #64748b;
+  --color-meta-tag-stone: #78716c;
+  --color-meta-tag-zinc: #71717a;
+  --color-meta-tag-steel: #6b7280;
 }
 
 @layer utilities {
   .bg-logo-gradiant {
     background: linear-gradient(135deg, #6c63ff, #a78bfa);
   }
+}
+
+/* Global nice dark scrollbar */
+* {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #44445a #16161a;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #16161a;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #44445a;
+  border-radius: 999px;
+  border: 2px solid #16161a;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #6c63ff;
 }

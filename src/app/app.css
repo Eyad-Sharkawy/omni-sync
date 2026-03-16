@@ -1,0 +1,5 @@
+@reference "../styles.css";
+
+:host {
+  @apply flex flex-col h-screen text-primary font-display;
+}
