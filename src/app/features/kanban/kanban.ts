@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import {TaskCard} from "../../shared/task-card/task-card";
-import {TasksColumn} from "../../shared/tasks-column/tasks-column";
-import {TaskMetaTag} from '../../shared/task-meta-tag/task-meta-tag';
+import {TaskCard} from "../../shared/components/task-card/task-card";
+import {TasksColumn} from "../../shared/components/tasks-column/tasks-column";
+import {TaskMetaTag} from '../../shared/components/task-meta-tag/task-meta-tag';
 
 @Component({
   selector: 'os-kanban',

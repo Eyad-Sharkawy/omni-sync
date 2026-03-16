@@ -13,13 +13,13 @@ export class TaskCard {
 
   priorityBgClass: Record<Priority, string> =  {
     low: "bg-priority-low",
-    medium: "bg-priority-mid",
+    medium: "bg-priority-medium",
     high: "bg-priority-high",
   };
 
   priorityTextClass: Record<Priority, string> = {
     low: "text-priority-low",
-    medium: "text-priority-mid",
+    medium: "text-priority-medium",
     high: "text-priority-high",
   };
 }

@@ -11,10 +11,6 @@
   --color-surface2: #1e1e24;
   --color-surface3: #252530;
   --color-border: #2a2a35;
-  --color-todo: #6c63ff;
-  --color-inprog: #ff9f43;
-  --color-review: #54a0ff;
-  --color-done: #1dd1a1;
   --color-danger: #ff6b6b;
   --color-muted: #44445a;
   --color-primary: #f0f0f5;
@@ -22,48 +18,75 @@
   --color-border: #2a2a35;
 
   --color-priority-low: #1dd1a1;
-  --color-priority-mid: #ff9f43;
+  --color-priority-medium: #ff9f43;
   --color-priority-high: #ff6b6b;
 
 
-  --shadow-todo: 0 0 8px #6c63ff;
-  --shadow-inprog: 0 0 8px #ff9f43;
-  --shadow-review: 0 0 8px #54a0ff;
-  --shadow-done: 0 0 8px #1dd1a1;
+  /* Omni Sync colors */
+
+  /* Purple & Indigo */
+  --color-os-violet: #6c63ff;
+  --color-os-lavender: #a78bfa;
+  --color-os-grape: #9333ea;
+  --color-os-indigo: #6366f1;
+
+  /* Warm Tones */
+  --color-os-amber: #ff9f43;
+  --color-os-coral: #ff6b6b;
+  --color-os-rose: #f43f5e;
+  --color-os-tomato: #ff4757;
+
+  /* Blue & Cyan */
+  --color-os-sky: #54a0ff;
+  --color-os-cyan: #22d3ee;
+  --color-os-cerulean: #0ea5e9;
+  --color-os-teal: #2dd4bf;
+
+  /* Greens */
+  --color-os-mint: #1dd1a1;
+  --color-os-emerald: #10b981;
+  --color-os-lime: #84cc16;
+  --color-os-sage: #4ade80;
+
+  /* Neutrals */
+  --color-os-slate: #64748b;
+  --color-os-stone: #78716c;
+  --color-os-zinc: #71717a;
+  --color-os-steel: #6b7280;
+
+  /* Omni Sync shadows */
+
+  /* Purple & Indigo */
+  --shadow-os-violet: 0 0 8px var(--color-os-violet);
+  --shadow-os-lavender: 0 0 8px var(--color-os-lavender);
+  --shadow-os-grape: 0 0 8px var(--color-os-grape);
+  --shadow-os-indigo: 0 0 8px var(--color-os-indigo);
+
+  /* Warm Tones */
+  --shadow-os-amber: 0 0 8px var(--color-os-amber);
+  --shadow-os-coral: 0 0 8px var(--color-os-coral);
+  --shadow-os-rose: 0 0 8px var(--color-os-rose);
+  --shadow-os-tomato: 0 0 8px var(--color-os-tomato);
+
+  /* Blue & Cyan */
+  --shadow-os-sky: 0 0 8px var(--color-os-sky);
+  --shadow-os-cyan: 0 0 8px var(--color-os-cyan);
+  --shadow-os-cerulean: 0 0 8px var(--color-os-cerulean);
+  --shadow-os-teal: 0 0 8px var(--color-os-teal);
+
+  /* Greens */
+  --shadow-os-mint: 0 0 8px var(--color-os-mint);
+  --shadow-os-emerald: 0 0 8px var(--color-os-emerald);
+  --shadow-os-lime: 0 0 8px var(--color-os-lime);
+  --shadow-os-sage: 0 0 8px var(--color-os-sage);
+
+  /* Neutrals */
+  --shadow-os-slate: 0 0 8px var(--color-os-slate);
+  --shadow-os-stone: 0 0 8px var(--color-os-stone);
+  --shadow-os-zinc: 0 0 8px var(--color-os-zinc);
+  --shadow-os-steel: 0 0 8px var(--color-os-steel);
 
   --shadow-btn-glow: 0 4px 24px rgba(108, 99, 255, 0.4);
-
-  /*Meta Tags colors*/
-  --color-meta-tag-violet: #6c63ff;
-  --color-meta-tag-lavender: #a78bfa;
-  --color-meta-tag-grape: #9333ea;
-  --color-meta-tag-indigo: #6366f1;
-
-  --color-meta-tag-amber: #ff9f43;
-  --color-meta-tag-coral: #ff6b6b;
-  --color-meta-tag-rose: #f43f5e;
-  --color-meta-tag-tomato: #ff4757;
-
-  --color-meta-tag-sky: #54a0ff;
-  --color-meta-tag-cyan: #22d3ee;
-  --color-meta-tag-cerulean: #0ea5e9;
-  --color-meta-tag-teal: #2dd4bf;
-
-  --color-meta-tag-mint: #1dd1a1;
-  --color-meta-tag-emerald: #10b981;
-  --color-meta-tag-lime: #84cc16;
-  --color-meta-tag-sage: #4ade80;
-
-  --color-meta-tag-slate: #64748b;
-  --color-meta-tag-stone: #78716c;
-  --color-meta-tag-zinc: #71717a;
-  --color-meta-tag-steel: #6b7280;
-}
-
-@layer utilities {
-  .bg-logo-gradiant {
-    background: linear-gradient(135deg, #6c63ff, #a78bfa);
-  }
 }
 
 /* Global nice dark scrollbar */

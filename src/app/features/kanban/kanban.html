@@ -1,5 +1,5 @@
 <main class="grid grid-flow-col auto-cols-[280px] grid-rows-[minmax(0,1fr)] gap-5 h-full w-max min-w-full">
-  <os-tasks-column class="" columnType="todo" numberOfTasks="9">
+  <os-tasks-column class="" columnColor="indigo" numberOfTasks="9">
     <ng-container ngProjectAs="[columnTitle]">To do</ng-container>
 
     <os-task-card taskPriority="high">
@@ -165,7 +165,7 @@
     </os-task-card>
   </os-tasks-column>
 
-  <os-tasks-column columnType="inprog" numberOfTasks="2">
+  <os-tasks-column columnColor="amber" numberOfTasks="2">
     <ng-container ngProjectAs="[columnTitle]">In progress</ng-container>
 
     <os-task-card taskPriority="high">
@@ -206,7 +206,7 @@
 
   </os-tasks-column>
 
-  <os-tasks-column columnType="review" numberOfTasks="1">
+  <os-tasks-column columnColor="sky" numberOfTasks="1">
     <ng-container ngProjectAs="[columnTitle]">In Review</ng-container>
 
     <os-task-card taskPriority="low">
@@ -228,7 +228,7 @@
     </os-task-card>
   </os-tasks-column>
 
-  <os-tasks-column columnType="done" numberOfTasks="6">
+  <os-tasks-column columnColor="mint" numberOfTasks="6">
     <ng-container ngProjectAs="[columnTitle]">Done</ng-container>
 
     <os-task-card taskPriority="medium">
@@ -338,6 +338,5 @@
         4/3/2026 to 10/3/2026
       </ng-container>
     </os-task-card>
-
   </os-tasks-column>
 </main>

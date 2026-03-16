@@ -1,6 +1,6 @@
 <header class="flex justify-between items-center border-b-1 border-b-border pt-4 px-4.5 pb-3.5">
   <div class="flex items-center gap-2.5">
-    <span [class]="headerSpanClasses[columnType()]" class="block w-2 h-2 rounded-full"></span>
+    <span [class]="headerSpanClasses[columnColor()]" class="block w-2 h-2 rounded-full"></span>
 
     <h2 class="font-bold text-sm uppercase">
       <ng-content select="[columnTitle]"/>

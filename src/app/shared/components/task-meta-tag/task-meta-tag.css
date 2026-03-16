@@ -1,4 +1,4 @@
-@reference "../../../styles.css";
+@reference "../../../../styles.css";
 
 :host {
   @apply rounded-sm text-[0.625rem] py-[3px] px-2;
