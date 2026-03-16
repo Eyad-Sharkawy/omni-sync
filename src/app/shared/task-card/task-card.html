@@ -1,17 +1,25 @@
 <div body class="bg-surface2 border-border rounded-lg p-3.5 cursor-grab">
   <div class="flex items-center gap-1.5 mb-2.5">
-    <span class="w-1.5 h-1.5 rounded-full bg-priority-high"></span>
-    <span class="text-priority-high text-[0.625rem] uppercase leading-0.25">High</span>
+    <span [class]="priorityBgClass[taskPriority()]" class="w-1.5 h-1.5 rounded-full"></span>
+
+    <span [class]="priorityTextClass[taskPriority()]"
+          class="text-[0.625rem] uppercase leading-0.25"
+    >
+      {{ taskPriority() }}
+    </span>
   </div>
 
-  <h3 class="font-semibold text-sm leading-[1.4] mb-2.5">Redesign onboarding flow for new users</h3>
+  <h3 class="font-semibold text-sm leading-[1.4] mb-2.5">
+    <ng-content select="[taskMessage]"/>
+  </h3>
 
   <div class="flex flex-wrap gap-1.5 mb-3">
-    <span class="text-meta-tag-indigo bg-meta-tag-indigo/10 border border-meta-tag-violet/20 rounded-sm text-[0.625rem] py-[3px] px-2">UX</span>
-    <span class="text-meta-tag-cyan bg-meta-tag-cyan/10 border border-meta-tag-cyan/20 rounded-sm text-[0.625rem] py-[3px] px-2">Research</span>
+    <ng-content select="os-task-meta-tag"/>
   </div>
 
   <div class="flex items-center justify-between">
-    <p class="font-mono text-sm text-muted">29/1/2026 to 29/3/2026</p>
+    <p class="font-mono text-sm text-muted">
+      <ng-content select="[taskDate]"/>
+    </p>
   </div>
 </div>
