@@ -239,6 +239,7 @@ export class KanbanStore {
         dueDate: new Date("2026-4-1")
       }
     ]);
+
   readonly boards = this._boards.asReadonly();
   currentBoard = computed(() => this.boards()[0]);
 }

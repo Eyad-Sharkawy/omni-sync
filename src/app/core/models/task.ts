@@ -5,8 +5,8 @@ export interface Task {
   message: string;
   metaTags: TaskMetaTag[];
   priority: "low" | "medium" | "high";
-  startDate?: Date;
-  dueDate?: Date;
+  startDate: Date;
+  dueDate: Date;
 }
 
 export interface TaskMetaTag {
