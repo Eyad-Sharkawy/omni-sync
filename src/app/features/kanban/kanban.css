@@ -1,7 +1,7 @@
 @reference "../../../styles.css";
 
 :host {
-  @apply relative isolate flex-1 flex min-h-0 min-w-0 overflow-hidden overflow-x-auto px-8 py-9;
+  @apply relative isolate flex-1 flex min-h-0 min-w-0 overflow-hidden overflow-x-auto;
 }
 
 :host::before {
