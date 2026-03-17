@@ -1,5 +1,5 @@
-<main class="flex h-full min-h-0 flex-col px-8 py-9 overflow-x-auto">
-  <header class="flex items-center gap-2 mb-6 w-max min-w-full">
+<main class="flex h-full min-h-0 flex-col px-8 py-9 overflow-hidden">
+  <header class="flex items-center gap-2 mb-6">
     <h2 class="font-bold text-sm text-secondary">
       {{ boardName() }}
     </h2>
@@ -7,7 +7,7 @@
     <span class="text-muted font-mono" aria-hidden="true">·</span>
 
 
-    <span class="text-sm text-muted font-mono tracking-[1.5px]">
+    <span class="text-sm text-muted font-mono leading-[1.5px]">
       <time [attr.datetime]="boardStartDate() | date: 'yyyy-MM-dd'">
        {{ boardStartDate() | date }}
       </time>
