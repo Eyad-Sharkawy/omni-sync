@@ -14,10 +14,10 @@ import {OmniSyncColors} from '../../UI/colors';
 })
 export class TasksColumn {
   numberOfTasks = input.required({transform: numberAttribute});
-  columnColor = input.required<OmniSyncColors>()
+  color = input.required<OmniSyncColors>()
 
   protected hostClass = computed(() => {
-    const type = this.columnColor();
+    const type = this.color();
 
     const classes: Record<OmniSyncColors, string> = {
       // Purple & Indigo

@@ -13,10 +13,10 @@ import {OmniSyncColors} from '../../UI/colors';
   }
 })
 export class TaskMetaTag {
-  metaTagColor = input.required<OmniSyncColors>();
+  color = input.required<OmniSyncColors>();
 
   hostClasses = computed(() => {
-    const color = this.metaTagColor();
+    const color = this.color();
 
     const classes: Record<OmniSyncColors, string> = {
       // Purple & Indigo
