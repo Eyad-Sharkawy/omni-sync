@@ -19,6 +19,7 @@ import {KanbanStore} from './services/kanban-store';
 })
 export class Kanban {
   private kanbanStore = inject(KanbanStore);
+
   currentBoard = this.kanbanStore.currentBoard;
   boardName = computed(() => this.currentBoard().name);
   boardStartDate = computed(() => this.currentBoard().startDate);

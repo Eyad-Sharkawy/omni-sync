@@ -4,10 +4,19 @@
       {{ boardName() }}
     </h2>
 
-    <span class="text-muted font-mono">·</span>
+    <span class="text-muted font-mono" aria-hidden="true">·</span>
+
 
     <span class="text-sm text-muted font-mono leading-[1.5px]">
-      {{ boardStartDate() | date }} → {{ boardDueDate() | date }}
+      <time [attr.datetime]="boardStartDate() | date: 'yyyy-MM-dd'">
+       {{ boardStartDate() | date }}
+      </time>
+
+      <span aria-hidden="true">→</span>
+
+      <time [attr.datetime]="boardDueDate() | date: 'yyyy-MM-dd'">
+        {{ boardDueDate() | date }}
+      </time>
     </span>
   </header>
 
