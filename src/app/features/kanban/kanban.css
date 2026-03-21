@@ -1,28 +1,28 @@
 @reference "../../../styles.css";
 
 :host {
-  @apply relative isolate flex-1 flex min-h-0 min-w-0 overflow-x-auto;
+  @apply relative isolate flex min-h-0 min-w-0 flex-1 overflow-x-auto;
 }
 
 :host::before {
-  @apply content-[""] absolute inset-0 pointer-events-none z-0;
+  @apply pointer-events-none absolute inset-0 z-0 content-[""];
   background-image: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PScwIDAgMjU2IDI1NicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSc0JyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsdGVyPSd1cmwoI24pJyBvcGFjaXR5PScwLjAzNScvPjwvc3ZnPg==");
 }
 
 .input {
-  @apply bg-surface2 border border-border rounded-lg py-2.5 px-3.5 font-mono text-sm text-primary;
+  @apply bg-surface2 border-border text-primary rounded-lg border px-3.5 py-2.5 font-mono text-sm;
 }
 
 .input:focus {
-  @apply outline outline-os-indigo shadow-os-indigo;
+  @apply outline-os-indigo shadow-os-indigo outline;
 }
 
 .label {
-  @apply text-muted tracking-[1.5px] text-[10px] uppercase font-mono;
+  @apply text-muted font-mono text-[10px] tracking-[1.5px] uppercase;
 }
 
 select.input {
-  @apply pr-8 appearance-none cursor-pointer bg-no-repeat;
+  @apply cursor-pointer appearance-none bg-no-repeat pr-8;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2372728a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-position: right 0.75rem center;
 }
@@ -31,24 +31,23 @@ select.input {
   @apply flex-1;
 
   input {
-    @apply absolute opacity-0 w-0 h-0 m-0;
+    @apply absolute m-0 h-0 w-0 opacity-0;
   }
 
   input:focus + label {
   }
 
   input:focus-visible + label {
-    @apply border rounded-lg;
+    @apply rounded-lg border;
   }
 
   label {
-    @apply w-full flex gap-1.5 justify-center items-center bg-surface2 border border-border rounded-lg text-secondary py-2 px-2.5 text-[11px] font-mono cursor-pointer;
+    @apply bg-surface2 border-border text-secondary flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2 font-mono text-[11px];
 
     span {
-      @apply w-1.5 h-1.5 rounded-full;
+      @apply h-1.5 w-1.5 rounded-full;
     }
   }
-
 
   #low-priority-radio {
     &:checked + label {

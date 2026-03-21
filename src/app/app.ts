@@ -1,13 +1,12 @@
-import { Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
+import { Component } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
 
-import {Navbar} from './layout/navbar/navbar';
+import { Navbar } from "./layout/navbar/navbar";
 
 @Component({
-  selector: 'os-root',
+  selector: "os-root",
   imports: [Navbar, RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css',
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class App {
-}
+export class App {}

@@ -1,11 +1,11 @@
-import {computed, effect, inject, Injectable, signal} from '@angular/core';
-import {Board} from '../../../core/models/board';
-import {Storage} from '../../../core/services/storage';
+import { computed, effect, inject, Injectable, signal } from "@angular/core";
+import { Board } from "../../../core/models/board";
+import { Storage } from "../../../core/services/storage";
 
 @Injectable()
 export class KanbanStore {
-  private readonly storage = inject(Storage)
-  private _boards= signal<Board[]>(this.storage.getBoards());
+  private readonly storage = inject(Storage);
+  private _boards = signal<Board[]>(this.storage.getBoards());
 
   constructor() {
     let isFirstRun = true;

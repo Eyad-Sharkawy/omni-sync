@@ -1,12 +1,12 @@
-import { Routes } from '@angular/router';
-import {Kanban} from './kanban';
-import { KanbanStore } from './services/kanban-store';
+import { Routes } from "@angular/router";
+import { Kanban } from "./kanban";
+import { KanbanStore } from "./services/kanban-store";
 
 export const KANBAN_ROUTES: Routes = [
   {
-    path: '',
+    path: "",
     component: Kanban,
     providers: [KanbanStore],
-    title: 'Kanban',
+    title: "Kanban",
   },
 ];

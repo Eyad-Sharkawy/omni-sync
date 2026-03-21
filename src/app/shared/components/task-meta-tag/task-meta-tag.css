@@ -1,5 +1,5 @@
 @reference "../../../../styles.css";
 
 :host {
-  @apply rounded-sm text-[0.625rem] py-[3px] px-2;
+  @apply rounded-sm px-2 py-[3px] text-[0.625rem];
 }
