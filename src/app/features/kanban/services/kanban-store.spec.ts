@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from "@angular/core/testing";
 
-import { KanbanStore } from './kanban-store';
+import { KanbanStore } from "./kanban-store";
 
-describe('Kanban', () => {
+describe("Kanban", () => {
   let service: KanbanStore;
 
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('Kanban', () => {
     service = TestBed.inject(KanbanStore);
   });
 
-  it('should be created', () => {
+  it("should be created", () => {
     expect(service).toBeTruthy();
   });
 });

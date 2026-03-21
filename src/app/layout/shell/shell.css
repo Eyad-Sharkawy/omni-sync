@@ -1,47 +1,52 @@
 @reference "../../../styles.css";
 
 :host {
-  @apply relative isolate flex-1 flex bg-bg;
-  background-image: linear-gradient(rgba(108, 99, 255, 0.1) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(108, 99, 255, 0.1) 1px, transparent 1px);
+  @apply bg-bg relative isolate flex flex-1;
+  background-image:
+    linear-gradient(rgba(108, 99, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 99, 255, 0.1) 1px, transparent 1px);
   background-size: 48px 48px;
   background-position: center;
 }
 
 :host::before {
   content: "";
-  @apply absolute inset-0 z-0 pointer-events-none;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14, 14, 16, 0) 0%, rgba(14, 14, 16, 0.65) 100%);
+  @apply pointer-events-none absolute inset-0 z-0;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgba(14, 14, 16, 0) 0%,
+    rgba(14, 14, 16, 0.65) 100%
+  );
 }
 
 .blob {
-  @apply absolute rounded-full blur-[80px] pointer-events-none;
+  @apply pointer-events-none absolute rounded-full blur-[80px];
   --blob-base-transform: none;
   animation: blobFloat 8s ease-in-out infinite;
 }
 
 .blob.blob-1 {
-  @apply w-125 h-125 -top-30 left-1/2;
+  @apply -top-30 left-1/2 h-125 w-125;
   background: radial-gradient(circle, rgba(108, 99, 255, 0.18), transparent 70%);
   --blob-base-transform: translateX(-50%);
   animation-delay: 0s;
 }
 
 .blob.blob-2 {
-  @apply w-75 h-75 top-50 right-1/10;
+  @apply top-50 right-1/10 h-75 w-75;
   background: radial-gradient(circle, rgba(84, 160, 255, 0.12), transparent 70%);
   animation-delay: -3s;
 }
 
 .blob.blob-3 {
-  @apply w-62.5 h-62.5 top-75 left-8/100;
-  background: radial-gradient(circle, rgba(29, 209, 161, 0.10), transparent 70%);
+  @apply top-75 left-8/100 h-62.5 w-62.5;
+  background: radial-gradient(circle, rgba(29, 209, 161, 0.1), transparent 70%);
   animation-delay: -5s;
 }
 
-
 @keyframes blobFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: var(--blob-base-transform) translateY(0);
   }
 

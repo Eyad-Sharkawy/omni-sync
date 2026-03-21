@@ -1,5 +1,5 @@
 @reference "../styles.css";
 
 :host {
-  @apply flex flex-col h-screen bg-bg text-primary font-display;
+  @apply bg-bg text-primary font-display flex h-screen flex-col;
 }

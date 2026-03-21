@@ -1,4 +1,4 @@
-import {OmniSyncColors} from '../../shared/UI/colors';
+import { OmniSyncColors } from "../../shared/UI/colors";
 
 export interface Task {
   id: string;

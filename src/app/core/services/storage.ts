@@ -1,15 +1,15 @@
-import {inject, Injectable} from '@angular/core';
-import {LOCAL_STORAGE} from '../tokens/local-storage';
-import {Board} from '../models/board';
+import { inject, Injectable } from "@angular/core";
+import { LOCAL_STORAGE } from "../tokens/local-storage";
+import { Board } from "../models/board";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class Storage {
   private readonly localStorage = inject(LOCAL_STORAGE);
   private readonly BOARDS_KEY = "omni-sync.boards";
 
-  private createInitialBoards(options: { persist: boolean } = {persist: true}): Board[] {
+  private createInitialBoards(options: { persist: boolean } = { persist: true }): Board[] {
     const initialBoards: Board[] = [
       {
         id: "board-product-ops-q1-2026",
@@ -19,31 +19,30 @@ export class Storage {
             id: "todo",
             header: "To do",
             color: "indigo",
-            tasks: []
+            tasks: [],
           },
           {
             id: "in-progress",
             header: "In progress",
             color: "amber",
-            tasks: []
+            tasks: [],
           },
           {
             id: "in-review",
             header: "In Review",
             color: "sky",
-            tasks: []
+            tasks: [],
           },
           {
             id: "done",
             header: "Done",
             color: "mint",
-            tasks: []
+            tasks: [],
           },
         ],
         startDate: new Date("2025-02-05"),
-        dueDate: new Date("2026-04-01")
-
-      }
+        dueDate: new Date("2026-04-01"),
+      },
     ];
 
     if (options.persist) {
@@ -51,7 +50,6 @@ export class Storage {
     }
 
     return initialBoards;
-
   }
 
   getBoards(): Board[] {
@@ -77,12 +75,12 @@ export class Storage {
           })),
         })),
       }));
-    } catch(error) {
+    } catch (error) {
       console.warn(
-        `[Storage] Failed to parse boards from localStorage key "${this.BOARDS_KEY}". Returning in-memory initial boards without overwriting stored value. ${error}`
+        `[Storage] Failed to parse boards from localStorage key "${this.BOARDS_KEY}". Returning in-memory initial boards without overwriting stored value. ${error}`,
       );
 
-      return this.createInitialBoards({persist: false});
+      return this.createInitialBoards({ persist: false });
     }
   }
 
