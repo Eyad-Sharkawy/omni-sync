@@ -1,27 +1,34 @@
-<header class="flex justify-between items-center border-b-1 border-b-border pt-4 px-4.5 pb-3.5">
+<header class="border-b-border flex items-center justify-between border-b-1 px-4.5 pt-4 pb-3.5">
   <div class="flex items-center gap-2.5">
-    <span [class]="headerSpanClasses[color()]" class="block w-2 h-2 rounded-full"></span>
+    <span [class]="headerSpanClasses[color()]" class="block h-2 w-2 rounded-full"></span>
 
-    <h2 class="font-bold text-sm uppercase">
-      <ng-content select="Header"/>
-    </h2>
+    <h3 class="text-sm font-bold uppercase">
+      <ng-content select="Header" />
+    </h3>
 
-    <span class="block text-muted text-sm bg-surface3 rounded-2xl py-0.5 px-2 text-center">{{ numberOfTasks() }}</span>
+    <span class="text-muted bg-surface3 block rounded-2xl px-2 py-0.5 text-center text-sm">{{
+      numberOfTasks()
+    }}</span>
   </div>
 
-  <button title="Add Task"
-          class="text-muted text-lg tracking-[0.5px] py-0.5 px-1.5 rounded-md cursor-pointer hover:bg-surface3 hover:text-primary">
+  <button
+    (click)="onAddTask()"
+    title="Add Task"
+    class="text-muted hover:bg-surface3 hover:text-primary cursor-pointer rounded-md px-1.5 py-0.5 text-lg tracking-[0.5px]"
+  >
     +
   </button>
 </header>
 
-<div class="flex flex-1 flex-col gap-2.5 overflow-y-auto min-h-0 p-3.5">
-  <ng-content select="os-task-card"/>
+<div class="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-3.5">
+  <ng-content select="os-task-card" />
 </div>
 
-<div class="border-t border-border py-3 px-3.5">
+<div class="border-border border-t px-3.5 py-3">
   <button
-    class="w-full border border-dashed border-border rounded-lg text-muted font-mono p-2.5 text-xs text-center cursor-pointer hover:bg-surface2 hover:border-muted hover:text-secondary">
+    (click)="onAddTask()"
+    class="border-border text-muted hover:bg-surface2 hover:border-muted hover:text-secondary w-full cursor-pointer rounded-lg border border-dashed p-2.5 text-center font-mono text-xs"
+  >
     + Add a task
   </button>
 </div>

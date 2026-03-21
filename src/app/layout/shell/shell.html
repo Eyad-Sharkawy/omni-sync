@@ -1,31 +1,40 @@
 <main
-  class="flex-1 flex flex-col items-center justify-center pt-15 px-12 pb-10 relative z-1 overflow-hidden text-center">
+  class="relative z-1 flex flex-1 flex-col items-center justify-center overflow-hidden px-12 pt-15 pb-10 text-center"
+>
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
 
-  <h2 class="max-w-200 font-extrabold text-[clamp(42px,7vw,80px)] leading-[1.05] tracking-tight mb-6">
+  <h2
+    class="mb-6 max-w-200 text-[clamp(42px,7vw,80px)] leading-[1.05] font-extrabold tracking-tight"
+  >
     Your team's work,
-    <br>
-    <span class="bg-gradient-to-br from-[#6c63ff] via-[#a78bfa] to-[#54a0ff] bg-clip-text text-transparent">perfectly in sync</span>
+    <br />
+    <span
+      class="bg-gradient-to-br from-[#6c63ff] via-[#a78bfa] to-[#54a0ff] bg-clip-text text-transparent"
+      >perfectly in sync</span
+    >
   </h2>
 
-  <p class="max-w-120 text-sm leading-[1.7] text-secondary font-mono mb-10">
-    Omni Sync brings boards, timelines, calendars and docs into one unified workspace — built for teams who ship fast.
+  <p class="text-secondary mb-10 max-w-120 font-mono text-sm leading-[1.7]">
+    Omni Sync brings boards, timelines, calendars and docs into one unified workspace — built for
+    teams who ship fast.
   </p>
 
   <div class="flex items-center gap-4">
-    <a routerLink="/kanban"
-       class="bg-os-indigo shadow-btn-glow font-mono text-sm rounded-lg tracking-[0.3px] font-medium py-3.5 px-7 mb-16 cursor-pointer"
+    <a
+      routerLink="/kanban"
+      class="bg-os-indigo shadow-btn-glow mb-16 cursor-pointer rounded-lg px-7 py-3.5 font-mono text-sm font-medium tracking-[0.3px]"
     >
       Open Kanban <span aria-hidden="true">-&gt;</span>
     </a>
   </div>
 
-  <div class="flex items-center gap-2.5 flex-wrap justify-center">
+  <div class="flex flex-wrap items-center justify-center gap-2.5">
     <div
-      class="flex items-center gap-1.5 text-sm tracking-[0.3px] text-secondary bg-surface border border-border rounded-[20px] py-1.5 px-3.5">
-      <span class="w-1 h-1 rounded-full bg-os-indigo shadow-os-indigo" aria-hidden="true"></span>
+      class="text-secondary bg-surface border-border flex items-center gap-1.5 rounded-[20px] border px-3.5 py-1.5 text-sm tracking-[0.3px]"
+    >
+      <span class="bg-os-indigo shadow-os-indigo h-1 w-1 rounded-full" aria-hidden="true"></span>
       <span>Kanban Board</span>
     </div>
   </div>

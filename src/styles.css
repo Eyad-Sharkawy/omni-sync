@@ -3,8 +3,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --font-display: "Syne", sans-serif;
+  --font-mono: "DM Mono", monospace;
 
   --color-bg: #0e0e10;
   --color-surface: #16161a;
@@ -20,7 +20,6 @@
   --color-priority-low: #1dd1a1;
   --color-priority-medium: #ff9f43;
   --color-priority-high: #ff6b6b;
-
 
   /* Omni Sync colors */
 
