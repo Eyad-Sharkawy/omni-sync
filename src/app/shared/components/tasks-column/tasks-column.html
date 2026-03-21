@@ -2,15 +2,18 @@
   <div class="flex items-center gap-2.5">
     <span [class]="headerSpanClasses[color()]" class="block w-2 h-2 rounded-full"></span>
 
-    <h2 class="font-bold text-sm uppercase">
+    <h3 class="font-bold text-sm uppercase">
       <ng-content select="Header"/>
-    </h2>
+    </h3>
 
     <span class="block text-muted text-sm bg-surface3 rounded-2xl py-0.5 px-2 text-center">{{ numberOfTasks() }}</span>
   </div>
 
-  <button title="Add Task"
-          class="text-muted text-lg tracking-[0.5px] py-0.5 px-1.5 rounded-md cursor-pointer hover:bg-surface3 hover:text-primary">
+  <button
+    (click)="addTask()"
+    title="Add Task"
+    class="text-muted text-lg tracking-[0.5px] py-0.5 px-1.5 rounded-md cursor-pointer hover:bg-surface3 hover:text-primary"
+  >
     +
   </button>
 </header>
@@ -21,6 +24,7 @@
 
 <div class="border-t border-border py-3 px-3.5">
   <button
+    (click)="addTask()"
     class="w-full border border-dashed border-border rounded-lg text-muted font-mono p-2.5 text-xs text-center cursor-pointer hover:bg-surface2 hover:border-muted hover:text-secondary">
     + Add a task
   </button>

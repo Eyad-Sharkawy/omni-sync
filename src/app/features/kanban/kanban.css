@@ -5,7 +5,78 @@
 }
 
 :host::before {
-  @apply absolute inset-0 pointer-events-none z-0;
-  content: "";
-  background-image: url("/images/backgrounds/kanban-background.svg");
+  @apply content-[""] absolute inset-0 pointer-events-none z-0;
+  background-image: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PScwIDAgMjU2IDI1NicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSc0JyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsdGVyPSd1cmwoI24pJyBvcGFjaXR5PScwLjAzNScvPjwvc3ZnPg==");
+}
+
+.input {
+  @apply bg-surface2 border border-border rounded-lg py-2.5 px-3.5 font-mono text-sm text-primary;
+}
+
+.input:focus {
+  @apply outline outline-os-indigo shadow-os-indigo;
+}
+
+.label {
+  @apply text-muted tracking-[1.5px] text-[10px] uppercase font-mono;
+}
+
+select.input {
+  @apply pr-8 appearance-none cursor-pointer bg-no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2372728a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+}
+
+.priority-radio {
+  @apply flex-1;
+
+  input {
+    @apply absolute opacity-0 w-0 h-0 m-0;
+  }
+
+  input:focus + label {
+  }
+
+  input:focus-visible + label {
+    @apply border rounded-lg;
+  }
+
+  label {
+    @apply w-full flex gap-1.5 justify-center items-center bg-surface2 border border-border rounded-lg text-secondary py-2 px-2.5 text-[11px] font-mono cursor-pointer;
+
+    span {
+      @apply w-1.5 h-1.5 rounded-full;
+    }
+  }
+
+
+  #low-priority-radio {
+    &:checked + label {
+      @apply border-priority-low text-priority-low bg-priority-low/20;
+    }
+
+    &:focus-visible + label {
+      @apply border-priority-low;
+    }
+  }
+
+  #medium-priority-radio {
+    &:checked + label {
+      @apply border-priority-medium text-priority-medium bg-priority-medium/20;
+    }
+
+    &:focus-visible + label {
+      @apply border-priority-medium;
+    }
+  }
+
+  #high-priority-radio {
+    &:checked + label {
+      @apply border-priority-high text-priority-high bg-priority-high/20;
+    }
+
+    &:focus-visible + label {
+      @apply border-priority-high;
+    }
+  }
 }
