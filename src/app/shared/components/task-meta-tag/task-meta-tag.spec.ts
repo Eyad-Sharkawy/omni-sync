@@ -1,23 +1,22 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { TaskMetaTag } from './task-meta-tag';
+import { TaskMetaTag } from "./task-meta-tag";
 
-describe('TaskMetaTag', () => {
+describe("TaskMetaTag", () => {
   let component: TaskMetaTag;
   let fixture: ComponentFixture<TaskMetaTag>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TaskMetaTag]
-    })
-    .compileComponents();
+      imports: [TaskMetaTag],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskMetaTag);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

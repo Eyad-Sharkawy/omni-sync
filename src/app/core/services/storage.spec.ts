@@ -1,13 +1,13 @@
 import { TestBed } from "@angular/core/testing";
 
-import { KanbanStore } from "./kanban-store";
+import { Storage } from "./storage";
 
-describe("Kanban", () => {
-  let service: KanbanStore;
+describe("Storage", () => {
+  let service: Storage;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(KanbanStore);
+    service = TestBed.inject(Storage);
   });
 
   it("should be created", () => {

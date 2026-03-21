@@ -1,25 +1,26 @@
-<div body class="bg-surface2 border-border rounded-lg p-3.5 cursor-grab">
-  <div class="flex items-center gap-1.5 mb-2.5">
-    <span [class]="priorityBgClass[taskPriority()]" class="w-1.5 h-1.5 rounded-full"></span>
+<div body class="bg-surface2 border-border cursor-grab rounded-lg p-3.5">
+  <div class="mb-2.5 flex items-center gap-1.5">
+    <span [class]="priorityBgClass[taskPriority()]" class="h-1.5 w-1.5 rounded-full"></span>
 
-    <span [class]="priorityTextClass[taskPriority()]"
-          class="text-[0.625rem] uppercase tracking-[1px]"
+    <span
+      [class]="priorityTextClass[taskPriority()]"
+      class="text-[0.625rem] tracking-[1px] uppercase"
     >
       {{ taskPriority() }}
     </span>
   </div>
 
-  <h3 class="font-semibold text-sm leading-[1.4] mb-2.5">
-    <ng-content select="Message"/>
-  </h3>
+  <h4 class="mb-2.5 text-sm leading-[1.4] font-semibold">
+    <ng-content select="Message" />
+  </h4>
 
-  <div class="flex flex-wrap gap-1.5 mb-3">
-    <ng-content select="os-task-meta-tag"/>
+  <div class="mb-3 flex flex-wrap gap-1.5">
+    <ng-content select="os-task-meta-tag" />
   </div>
 
   <div class="flex items-center justify-between">
-    <p class="font-mono text-sm text-muted">
-      <ng-content select="Date"/>
+    <p class="text-muted font-mono text-sm">
+      <ng-content select="Date" />
     </p>
   </div>
 </div>
