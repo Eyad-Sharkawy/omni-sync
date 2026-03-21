@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { TaskMetaTag } from "./task-meta-tag";
+import { TaskTag } from "./task-tag.component";
 
 describe("TaskMetaTag", () => {
-  let component: TaskMetaTag;
-  let fixture: ComponentFixture<TaskMetaTag>;
+  let component: TaskTag;
+  let fixture: ComponentFixture<TaskTag>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TaskMetaTag],
+      imports: [TaskTag],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TaskMetaTag);
+    fixture = TestBed.createComponent(TaskTag);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -4,8 +4,8 @@
   @apply bg-surface2 border-border text-primary w-full min-w-0 flex-1 rounded-lg border px-3.5 py-2.5 font-mono text-sm;
 }
 
-.input:focus {
-  @apply outline-os-indigo shadow-os-indigo outline;
+.input:focus-within {
+  @apply shadow-[var(--selected-color)] outline outline-[var(--selected-color)];
 }
 
 .label {
