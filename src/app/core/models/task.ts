@@ -2,14 +2,14 @@ import { OmniSyncColors } from "../../shared/UI/colors";
 
 export interface Task {
   id: string;
-  message: string;
-  metaTags: TaskMetaTag[];
+  title: string;
+  tags: TaskTags[];
   priority: "low" | "medium" | "high";
   startDate: Date;
   dueDate: Date;
 }
 
-export interface TaskMetaTag {
+export interface TaskTags {
   id: string;
   text: string;
   color: OmniSyncColors;

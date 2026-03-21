@@ -1,20 +1,20 @@
 <main class="flex h-full min-h-0 flex-col overflow-x-auto px-8 py-9">
   <header class="mb-6 flex w-max min-w-full items-center gap-2">
     <h2 class="text-secondary text-sm font-bold">
-      {{ boardName() }}
+      {{ board().name }}
     </h2>
 
     <span class="text-muted font-mono" aria-hidden="true">·</span>
 
     <span class="text-muted font-mono text-sm tracking-[1.5px]">
-      <time [attr.datetime]="boardStartDate() | date: 'yyyy-MM-dd'">
-        {{ boardStartDate() | date }}
+      <time [attr.datetime]="board().startDate | date: 'yyyy-MM-dd'">
+        {{ board().startDate | date }}
       </time>
 
       <span aria-hidden="true">→</span>
 
-      <time [attr.datetime]="boardDueDate() | date: 'yyyy-MM-dd'">
-        {{ boardDueDate() | date }}
+      <time [attr.datetime]="board().dueDate | date: 'yyyy-MM-dd'">
+        {{ board().dueDate | date }}
       </time>
     </span>
   </header>
@@ -22,7 +22,7 @@
   <div
     class="grid min-h-0 w-max min-w-full flex-1 auto-cols-[280px] grid-flow-col grid-rows-[minmax(0,1fr)] gap-5"
   >
-    @for (column of currentBoard().columns; track column.id) {
+    @for (column of columns(); track column.id) {
       <os-tasks-column
         [id]="column.id"
         [color]="column.color"
@@ -36,13 +36,13 @@
         @for (task of column.tasks; track task.id) {
           <os-task-card [taskPriority]="task.priority">
             <ng-container ngProjectAs="Message">
-              {{ task.message }}
+              {{ task.title }}
             </ng-container>
 
-            @for (metaTag of task.metaTags; track metaTag.id) {
-              <os-task-meta-tag [color]="metaTag.color">
-                {{ metaTag.text }}
-              </os-task-meta-tag>
+            @for (tag of task.tags; track tag.id) {
+              <os-task-tag [color]="tag.color">
+                {{ tag.text }}
+              </os-task-tag>
             }
 
             <ng-container ngProjectAs="Date">
@@ -56,5 +56,5 @@
 </main>
 
 @if (showModal()) {
-  <os-add-task-modal (closed)="closeModal()" />
+  <os-add-task-modal [initialSelectedColumnId]="selectedColumnId()" (closed)="closeModal()" />
 }

@@ -5,5 +5,5 @@
 }
 
 :host::before {
-  @apply absolute top-0 left-0 h-[3px] w-full rounded-t-xl;
+  @apply absolute top-0 left-0 h-[3px] w-full rounded-t-xl bg-[var(--color)] content-[""];
 }
