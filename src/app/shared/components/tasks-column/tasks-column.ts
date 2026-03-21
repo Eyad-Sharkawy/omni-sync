@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, input, numberAttribute} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, numberAttribute, output} from '@angular/core';
 import {OmniSyncColors} from '../../UI/colors';
 
 
@@ -13,8 +13,10 @@ import {OmniSyncColors} from '../../UI/colors';
   }
 })
 export class TasksColumn {
+  id = input.required<string>();
   numberOfTasks = input.required({transform: numberAttribute});
   color = input.required<OmniSyncColors>()
+  onAddTask = output<string>();
 
   protected hostClass = computed(() => {
     const type = this.color();
@@ -84,5 +86,11 @@ export class TasksColumn {
     stone: "bg-os-stone shadow-os-stone",
     zinc: "bg-os-zinc shadow-os-zinc",
     steel: "bg-os-steel shadow-os-steel",
+  }
+
+  addTask() {
+    const columnID = this.id();
+
+    this.onAddTask.emit(columnID);
   }
 }

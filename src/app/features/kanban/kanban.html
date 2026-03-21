@@ -7,7 +7,7 @@
     <span class="text-muted font-mono" aria-hidden="true">·</span>
 
 
-    <span class="text-sm text-muted font-mono leading-[1.5px]">
+    <span class="text-sm text-muted font-mono tracking-[1.5px]">
       <time [attr.datetime]="boardStartDate() | date: 'yyyy-MM-dd'">
        {{ boardStartDate() | date }}
       </time>
@@ -23,8 +23,10 @@
   <div class="flex-1 min-h-0 grid grid-flow-col auto-cols-[280px] grid-rows-[minmax(0,1fr)] gap-5 w-max min-w-full">
     @for (column of currentBoard().columns; track column.id) {
       <os-tasks-column
+        [id]="column.id"
         [color]="column.color"
         [numberOfTasks]="column.tasks.length"
+        (onAddTask)="openModal($event)"
       >
         <ng-container ngProjectAs="Header">
           {{ column.header }}
@@ -51,3 +53,109 @@
     }
   </div>
 </main>
+
+@if (showModal()) {
+  <dialog
+    #addTaskModal
+    (click)="closeOnBackdrop($event, addTaskModal)"
+    (close)="closeModal()"
+    class="
+      relative self-center mx-auto w-full max-w-130 border border-border rounded-2xl text-primary bg-surface backdrop:bg-black/40
+      before:absolute before:w-full before:h-0.5 before:top-0 before:left-0 before:bg-os-indigo
+    "
+  >
+    <header class="flex items-center justify-between pt-5 px-6">
+      <div>
+        <div class="flex items-center gap-2 bg-surface2 border border-border rounded-2xl py-1 px-3">
+          <span class="w-1.5 h-1.5 rounded-full bg-os-indigo shadow-os-indigo"></span>
+          <span class="text-sm text-secondary tracking-[0.5px]">To Do</span>
+        </div>
+
+        <h2 class="font-extrabold text-lg -tracking-[0.3px] mt-3.5">Add new task</h2>
+      </div>
+
+      <button
+        class="flex justify-center items-center w-7.5 h-7.5 -mt-3.5 rounded-lg bg-surface2 border border-border text-secondary text-base cursor-pointer hover:bg-surface3 hover:text-primary focus-visible:outline focus:outline-os-indigo"
+        (click)="closeModal()"
+      >
+        ✕
+      </button>
+    </header>
+
+    <form class="flex flex-col gap-4 pt-5 px-6 pb-6">
+      <div class="flex flex-col gap-1.5">
+        <label for="task-title" class="label">Task Title</label>
+        <input id="task-title" type="text" placeholder="What needs to be done" class="input">
+      </div>
+
+      <hr class="text-border">
+
+      <fieldset class="flex flex-col">
+        <legend class="label">Priority</legend>
+
+        <div class="flex gap-2 mt-1.5">
+          <div class="priority-radio">
+            <input type="radio" name="priority" id="low-priority-radio">
+            <label for="low-priority-radio">
+              <span class="bg-priority-low"></span> Low
+            </label>
+          </div>
+
+          <div class="priority-radio flex-1">
+            <input type="radio" name="priority" id="medium-priority-radio">
+            <label for="medium-priority-radio">
+              <span class="bg-priority-medium"></span> Medium
+            </label>
+          </div>
+
+          <div class="priority-radio flex-1">
+            <input type="radio" name="priority" id="high-priority-radio">
+            <label for="high-priority-radio">
+              <span class="bg-priority-high"></span> High
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="column-input" class="label">Column</label>
+        <select name="column-name" id="column-input" class="input">
+          <option value="todo">To Do</option>
+          <option value="inprog">In Progress</option>
+          <option value="review">In Review</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="start-date-input" class="label">Start Date</label>
+        <input type="date" id="start-date-input" class="input">
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="due-date-input" class="label">Due Date</label>
+        <input type="date" id="due-date-input" class="input">
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="meta-tag-input" class="label">Tags</label>
+        <input type="text" id="meta-tag-input" placeholder="Add tag..." class="input">
+      </div>
+
+      <hr class="text-border">
+
+      <div class="flex justify-end gap-2 text-[12px] font-mono">
+        <button
+          (click)="closeModal()"
+          class="py-2 px-4.5 rounded-lg border border-border bg-transparent text-secondary cursor-pointer hover:bg-surface2 hover:text-primary">
+          Cancel
+        </button>
+
+        <button
+          class="py-2 px-5.5 rounded-lg bg-os-indigo text-primary font-medium cursor-pointer hover:opacity-85">
+          Add task
+        </button>
+      </div>
+    </form>
+  </dialog>
+}
