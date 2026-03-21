@@ -59,8 +59,7 @@
   <dialog
     #addTaskModal
     (click)="closeOnBackdrop($event, addTaskModal)"
-    (keydown.enter)="closeOnBackdrop($event, addTaskModal)"
-    (keydown.space)="closeOnBackdrop($event, addTaskModal)"
+    (keydown.esc)="closeOnBackdrop($event, addTaskModal)"
     (close)="closeModal()"
     tabindex="0"
     class="border-border text-primary bg-surface before:bg-os-indigo relative mx-auto w-full max-w-130 self-center rounded-2xl border backdrop:bg-black/40 before:absolute before:top-0 before:left-0 before:h-0.5 before:w-full"
