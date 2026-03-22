@@ -45,7 +45,13 @@
             }
 
             <ng-container ngProjectAs="Date">
-              {{ task.startDate | date }} → {{ task.dueDate | date }}
+              <time [attr.datetime]="task.startDate | date: 'yyyy-MM-dd'">
+                {{ task.startDate | date }}
+              </time>
+              <span>→</span>
+              <time [attr.datetime]="task.dueDate | date: 'yyyy-MM-dd'">
+                {{ task.dueDate | date }}
+              </time>
             </ng-container>
           </os-task-card>
         }
