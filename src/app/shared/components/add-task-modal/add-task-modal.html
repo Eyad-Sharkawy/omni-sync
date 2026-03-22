@@ -117,9 +117,9 @@
           @for (tag of selectedTags(); track tag.id) {
             <os-task-tag
               removeButton="true"
-              (remove)="removeTag(tag.id)"
               [color]="tag.color"
               (click)="onTagClick(tag.id)"
+              (remove)="removeTag(tag.id)"
               class="cursor-pointer select-none"
             >
               {{ tag.text }}

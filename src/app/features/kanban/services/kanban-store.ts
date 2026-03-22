@@ -4,7 +4,7 @@ import { Board } from "../../../core/models/board";
 import { Storage } from "../../../core/services/storage";
 import { Column } from "../../../core/models/column";
 import { Task } from "../../../core/models/task";
-import { generateId } from "../../../shared/functions/generateId";
+import { generateId } from "../../../shared/functions/generate-id";
 
 export interface CreateTaskInput {
   title: string;

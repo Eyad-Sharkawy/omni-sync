@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { TaskTag } from "./task-tag.component";
+import { TaskTag } from "./task-tag";
 
 describe("TaskMetaTag", () => {
   let component: TaskTag;
