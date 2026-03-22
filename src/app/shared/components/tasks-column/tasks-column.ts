@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, Component, input, numberAttribute, output } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  contentChildren,
+  input,
+  output,
+} from "@angular/core";
 import { OmniSyncColors } from "../../UI/colors";
+import { TaskCard } from "../task-card/task-card";
 
 @Component({
   selector: "os-tasks-column",
@@ -12,14 +20,12 @@ import { OmniSyncColors } from "../../UI/colors";
   },
 })
 export class TasksColumn {
-  id = input.required<string>();
-  numberOfTasks = input.required({ transform: numberAttribute });
+  taskCards = contentChildren(TaskCard);
+  numberOfTasks = computed(() => this.taskCards().length);
   color = input.required<OmniSyncColors>();
-  addTask = output<string>();
+  addTask = output();
 
   onAddTask() {
-    const columnID = this.id();
-
-    this.addTask.emit(columnID);
+    this.addTask.emit();
   }
 }

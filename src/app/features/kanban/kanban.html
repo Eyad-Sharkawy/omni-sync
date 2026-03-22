@@ -23,18 +23,17 @@
     class="grid min-h-0 w-max min-w-full flex-1 auto-cols-[280px] grid-flow-col grid-rows-[minmax(0,1fr)] gap-5"
   >
     @for (column of columns(); track column.id) {
-      <os-tasks-column
-        [id]="column.id"
-        [color]="column.color"
-        [numberOfTasks]="column.tasks.length"
-        (addTask)="openModal($event)"
-      >
+      <os-tasks-column [color]="column.color" (addTask)="openModal({ columnId: column.id })">
         <ng-container ngProjectAs="Header">
           {{ column.header }}
         </ng-container>
 
         @for (task of column.tasks; track task.id) {
-          <os-task-card [taskPriority]="task.priority">
+          <os-task-card
+            [taskPriority]="task.priority"
+            (edit)="openModal({ columnId: column.id, taskId: task.id })"
+            (delete)="onDeleteTask(column.id, task.id)"
+          >
             <ng-container ngProjectAs="Message">
               {{ task.title }}
             </ng-container>
@@ -56,5 +55,5 @@
 </main>
 
 @if (showModal()) {
-  <os-add-task-modal [initialSelectedColumnId]="selectedColumnId()" (closed)="closeModal()" />
+  <os-add-task-modal [initialInfo]="addTaskModalInfo()" (closed)="closeModal()" />
 }

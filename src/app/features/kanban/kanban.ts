@@ -19,14 +19,25 @@ export class Kanban {
   board = this.kanbanStore.currentBoard;
   columns = this.kanbanStore.columns;
   showModal = signal(false);
-  selectedColumnId = signal(this.columns()[0].id);
+  addTaskModalInfo = signal<{ columnId?: string; taskId?: string }>({});
 
-  openModal(columnId: string) {
-    if (this.selectedColumnId() !== columnId) {
-      const column = this.kanbanStore.getColumnById(columnId);
+  openModal(taskInfo: { columnId: string; taskId?: string }) {
+    if (this.addTaskModalInfo().columnId !== taskInfo.columnId) {
+      const column = this.kanbanStore.getColumnById(taskInfo.columnId);
 
       if (column) {
-        this.selectedColumnId.set(column.id);
+        if (taskInfo.taskId) {
+          const task = column.tasks.find((task) => task.id === taskInfo.taskId);
+
+          if (task) {
+            this.addTaskModalInfo.set(taskInfo);
+          }
+        } else {
+          this.addTaskModalInfo.update((value) => ({
+            ...value,
+            columnId: taskInfo.columnId,
+          }));
+        }
       }
     }
 
@@ -34,6 +45,12 @@ export class Kanban {
   }
 
   closeModal() {
+    this.addTaskModalInfo.set({});
+
     this.showModal.set(false);
+  }
+
+  onDeleteTask(columnId: string, taskId: string) {
+    this.kanbanStore.removeTask(columnId, taskId);
   }
 }

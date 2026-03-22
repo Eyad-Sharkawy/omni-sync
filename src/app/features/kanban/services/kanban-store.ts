@@ -1,15 +1,17 @@
 import { computed, effect, inject, Injectable, signal } from "@angular/core";
+
 import { Board } from "../../../core/models/board";
 import { Storage } from "../../../core/services/storage";
 import { Column } from "../../../core/models/column";
 import { Task } from "../../../core/models/task";
+import { generateId } from "../../../shared/functions/generateId";
 
 export interface CreateTaskInput {
-  message: string;
+  title: string;
   priority: Task["priority"];
   startDate: Date;
   dueDate: Date;
-  metaTags?: Task["tags"];
+  tags?: Task["tags"];
 }
 
 @Injectable()
@@ -44,12 +46,13 @@ export class KanbanStore {
     let lastSerialized = JSON.stringify(this._boards());
 
     effect(() => {
+      const boards = this._boards();
+
       if (isFirstRun) {
         isFirstRun = false;
         return;
       }
 
-      const boards = this._boards();
       const nextSerialized = JSON.stringify(boards);
 
       if (nextSerialized === lastSerialized) {
@@ -78,10 +81,10 @@ export class KanbanStore {
     }
 
     const task: Task = {
-      id: crypto.randomUUID(),
-      title: taskInput.message,
+      id: generateId(),
+      title: taskInput.title,
       priority: taskInput.priority,
-      tags: taskInput.metaTags ?? [],
+      tags: taskInput.tags ?? [],
       startDate: taskInput.startDate,
       dueDate: taskInput.dueDate,
     };
