@@ -25,8 +25,8 @@ import {
 import { KanbanStore } from "../../../features/kanban/services/kanban-store";
 import { ALL_COLORS, OmniSyncColors } from "../../UI/colors";
 import { Task } from "../../../core/models/task";
-import { TaskTag } from "../task-tag/task-tag.component";
-import { generateId } from "../../functions/generateId";
+import { TaskTag } from "../task-tag/task-tag";
+import { generateId } from "../../functions/generate-id";
 import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({

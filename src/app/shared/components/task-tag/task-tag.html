@@ -1,0 +1,6 @@
+<div class="flex gap-2">
+  <ng-content />
+  @if (removeButton()) {
+    <button type="button" (click)="onRemove()" class="cursor-pointer">✕</button>
+  }
+</div>

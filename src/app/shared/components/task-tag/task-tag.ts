@@ -6,8 +6,8 @@ import { OmniSyncColors } from "../../UI/colors";
   selector: "os-task-tag",
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: "./task-tag.component.html",
-  styleUrl: "./task-tag.component.css",
+  templateUrl: "./task-tag.html",
+  styleUrl: "./task-tag.css",
   host: {
     "[style.--color]": "'var(--color-os-' + color() + ')'",
   },

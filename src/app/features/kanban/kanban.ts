@@ -3,7 +3,7 @@ import { DatePipe } from "@angular/common";
 
 import { TaskCard } from "../../shared/components/task-card/task-card";
 import { TasksColumn } from "../../shared/components/tasks-column/tasks-column";
-import { TaskTag } from "../../shared/components/task-tag/task-tag.component";
+import { TaskTag } from "../../shared/components/task-tag/task-tag";
 import { KanbanStore } from "./services/kanban-store";
 import { AddTaskModal } from "../../shared/components/add-task-modal/add-task-modal";
 

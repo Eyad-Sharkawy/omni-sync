@@ -1,12 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  contentChild,
-  contentChildren,
-  input,
-  output,
-} from "@angular/core";
-import { TaskTag } from "../task-tag/task-tag.component";
+import { ChangeDetectionStrategy, Component, contentChildren, input, output } from "@angular/core";
+import { TaskTag } from "../task-tag/task-tag";
 import { NgOptimizedImage } from "@angular/common";
 
 type Priority = "low" | "medium" | "high";
