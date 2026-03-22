@@ -27,6 +27,7 @@
   <form
     [formGroup]="addTaskForm"
     (ngSubmit)="onSubmit()"
+    autocomplete="off"
     class="flex flex-col gap-4 px-6 pt-5 pb-6"
   >
     <div class="flex flex-col gap-1.5">
@@ -35,14 +36,21 @@
         formControlName="title"
         id="task-title"
         type="text"
-        placeholder="What needs to be done"
+        inputmode="text"
+        enterkeyhint="done"
+        autocomplete="off"
+        placeholder="Enter task title"
         class="input"
+        required
       />
+      @if (titleIsInvalid) {
+        <p class="text-danger text-sm">Add a title for this task</p>
+      }
     </div>
 
     <hr class="text-border" />
 
-    <fieldset class="flex flex-col">
+    <fieldset class="flex flex-col gap-2">
       <legend class="label">Priority</legend>
 
       <div class="mt-1.5 flex gap-2">
@@ -81,25 +89,53 @@
           <label for="high-priority-radio"> <span class="bg-priority-high"></span> High </label>
         </div>
       </div>
+
+      @if (priorityIsInvalid) {
+        <p class="text-danger text-sm">Select a priority</p>
+      }
     </fieldset>
 
     <div class="flex flex-col gap-1.5">
       <label for="column-input" class="label">Column</label>
-      <select formControlName="column" name="column-name" id="column-input" class="input">
+      <select formControlName="column" name="column-name" id="column-input" class="input" required>
         @for (column of columns(); track column.id) {
           <option [value]="column.id">
             {{ column.header }}
           </option>
         }
       </select>
+
+      @if (columnIsInvalid) {
+        <p class="text-danger text-sm">Select a column</p>
+      }
     </div>
 
     <div class="flex flex-col gap-1.5">
-      <label for="meta-tag-input" class="label">Tags</label>
+      <label for="tags-input" class="label">Tags</label>
+      @if (selectedTags().length !== 0) {
+        <div class="mb-3 flex flex-wrap gap-1.5">
+          @for (tag of selectedTags(); track tag.id) {
+            <os-task-tag
+              removeButton="true"
+              (remove)="removeTag(tag.id)"
+              [color]="tag.color"
+              (click)="onTagClick(tag.id)"
+              class="cursor-pointer select-none"
+            >
+              {{ tag.text }}
+            </os-task-tag>
+          }
+        </div>
+      }
+
       <input
-        formControlName="metaTags"
+        formControlName="tags"
+        (keydown.enter)="onTagEnter($event)"
         type="text"
-        id="meta-tag-input"
+        inputmode="text"
+        enterkeyhint="done"
+        autocomplete="off"
+        id="tags-input"
         placeholder="Add tag..."
         class="input"
       />
@@ -107,12 +143,27 @@
 
     <div class="flex flex-col gap-1.5">
       <label for="start-date-input" class="label">Start Date</label>
-      <input formControlName="startDate" type="date" id="start-date-input" class="input" />
+      <input formControlName="startDate" type="date" id="start-date-input" class="input" required />
+
+      @if (startDateIsInvalid) {
+        <p class="text-danger text-sm">select a valid start date</p>
+      }
     </div>
 
     <div class="flex flex-col gap-1.5">
       <label for="due-date-input" class="label">Due Date</label>
-      <input formControlName="dueDate" type="date" id="due-date-input" class="input" />
+      <input
+        formControlName="dueDate"
+        [min]="minDueDate()"
+        type="date"
+        id="due-date-input"
+        class="input"
+        required
+      />
+
+      @if (dueDateIsInvalid) {
+        <p class="text-danger text-sm">select a valid due date</p>
+      }
     </div>
 
     <hr class="text-border" />
@@ -127,6 +178,7 @@
       </button>
 
       <button
+        #submitBtnElement
         type="submit"
         class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
       >

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
+import { booleanAttribute, ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
 import { OmniSyncColors } from "../../UI/colors";
 
@@ -14,4 +14,10 @@ import { OmniSyncColors } from "../../UI/colors";
 })
 export class TaskTag {
   color = input.required<OmniSyncColors>();
+  removeButton = input(false, { transform: booleanAttribute });
+  remove = output();
+
+  onRemove() {
+    this.remove.emit();
+  }
 }

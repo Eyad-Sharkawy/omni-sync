@@ -1,5 +1,5 @@
 @reference "../../../../styles.css";
 
 :host {
-  @apply rounded-sm border border-[var(--color)]/20 bg-[var(--color)]/10 px-2 py-[3px] text-[0.625rem] text-[var(--color)];
+  @apply rounded-sm border border-[var(--color)]/20 bg-[var(--color)]/10 px-2 py-[3px] text-[0.625rem] text-[var(--color)] capitalize;
 }
