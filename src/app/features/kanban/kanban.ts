@@ -58,7 +58,6 @@ export class Kanban {
 
   modalBadge = computed(() => this.modalColumn()?.header ?? "");
   modalColor = signal<OmniSyncColors>("zinc");
-  // modalColor = computed<OmniSyncColors>(() => this.modalColumn()?.color ?? "zinc");
 
   constructor() {
     effect(() => {
