@@ -21,9 +21,30 @@
 
   <div
     class="grid min-h-0 w-max min-w-full flex-1 auto-cols-[280px] grid-flow-col grid-rows-[minmax(0,1fr)] gap-5"
+    cdkDropListGroup
+    cdkDropList
+    [cdkDropListData]="columns()"
+    cdkDropListOrientation="horizontal"
+    [cdkDropListEnterPredicate]="isColumnDrop"
+    (cdkDropListDropped)="onDropColumn($event)"
   >
     @for (column of columns(); track column.id) {
-      <os-tasks-column [color]="column.color" (addTask)="openModal({ columnId: column.id })">
+      <os-tasks-column
+        [color]="column.color"
+        (delete)="onDeleteColumn(column.id)"
+        (addTask)="onAddTask({ columnId: column.id })"
+        (edit)="onEditColumn(column.id)"
+        cdkDropList
+        [cdkDropListData]="column"
+        [cdkDropListEnterPredicate]="isTaskDrop"
+        [cdkDropListElementContainer]="'.tasks-list'"
+        (cdkDropListDropped)="onDropTask($event)"
+        cdkDrag
+        [cdkDragData]="column"
+        (cdkDragStarted)="onDragStarted()"
+        (cdkDragEnded)="onDragEnded()"
+        class="cursor-grab"
+      >
         <ng-container ngProjectAs="Header">
           {{ column.header }}
         </ng-container>
@@ -31,8 +52,13 @@
         @for (task of column.tasks; track task.id) {
           <os-task-card
             [taskPriority]="task.priority"
-            (edit)="openModal({ columnId: column.id, taskId: task.id })"
+            (edit)="onEditTask({ columnId: column.id, taskId: task.id })"
             (delete)="onDeleteTask(column.id, task.id)"
+            cdkDrag
+            [cdkDragData]="task"
+            (cdkDragStarted)="onDragStarted()"
+            (cdkDragEnded)="onDragEnded()"
+            class="cursor-grab"
           >
             <ng-container ngProjectAs="Message">
               {{ task.title }}
@@ -57,9 +83,43 @@
         }
       </os-tasks-column>
     }
+
+    <button
+      class="border-border text-muted hover:bg-surface/40 z-1 cursor-pointer border border-dashed text-3xl font-extralight"
+      title="Add column"
+      (click)="onAddColumn()"
+    >
+      +
+    </button>
   </div>
 </main>
 
-@if (showModal()) {
-  <os-add-task-modal [initialInfo]="addTaskModalInfo()" (closed)="closeModal()" />
+@switch (selectedModal()) {
+  @case ("addTask") {
+    <os-modal
+      title="Add new task"
+      [badge]="modalBadge()"
+      [color]="modalColor()"
+      (closed)="closeModal()"
+    >
+      <os-add-task-form
+        [initialInfo]="addTaskModalInfo()!"
+        (selectedColumnChanged)="onModalColumnChanged($event)"
+        (closed)="closeModal()"
+      />
+    </os-modal>
+  }
+  @case ("addColumn") {
+    <os-modal
+      [title]="addColumnModalInfo() ? 'Edit column' : 'Add new column'"
+      [color]="modalColor()"
+      (closed)="closeModal()"
+    >
+      <os-add-column-form
+        [selectedColumnInfo]="addColumnModalInfo()"
+        (colorChange)="onColorChange($event)"
+        (closed)="closeModal()"
+      />
+    </os-modal>
+  }
 }

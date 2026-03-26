@@ -1,60 +1,43 @@
-import {
-  afterNextRender,
-  Component,
-  computed,
-  DestroyRef,
-  ElementRef,
-  inject,
-  input,
-  OnInit,
-  output,
-  signal,
-  viewChild,
-} from "@angular/core";
+import { afterNextRender, Component, computed, inject, input, output, signal } from "@angular/core";
+import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import {
   AbstractControl,
   FormControl,
   FormGroup,
-  FormsModule,
   ReactiveFormsModule,
   ValidationErrors,
   ValidatorFn,
   Validators,
 } from "@angular/forms";
 
-import { KanbanStore } from "../../../features/kanban/services/kanban-store";
-import { ALL_COLORS, OmniSyncColors } from "../../UI/colors";
-import { Task } from "../../../core/models/task";
-import { TaskTag } from "../task-tag/task-tag";
-import { generateId } from "../../functions/generate-id";
-import { toSignal } from "@angular/core/rxjs-interop";
+import { KanbanStore } from "../../services/kanban-store";
+import { Task } from "../../../../core/models/task";
+import { ALL_COLORS, OmniSyncColors } from "../../../../shared/UI/colors";
+import { generateId } from "../../../../shared/functions/generate-id";
+import { TaskTag } from "../../../../shared/components/task-tag/task-tag";
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from "@angular/cdk/drag-drop";
 
 @Component({
-  selector: "os-add-task-modal",
-  imports: [FormsModule, ReactiveFormsModule, TaskTag],
-  templateUrl: "./add-task-modal.html",
-  styleUrl: "./add-task-modal.css",
-  host: {
-    "[style.--color]": "'var(--color-os-' + color() + ')'",
-  },
+  selector: "os-add-task-form",
+  imports: [ReactiveFormsModule, TaskTag, CdkDrag, CdkDropList],
+  templateUrl: "./add-task-form.html",
+  styleUrl: "./add-task-form.css",
 })
-export class AddTaskModal implements OnInit {
+export class AddTaskForm {
   private readonly kanbanStore = inject(KanbanStore);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly dialogRef = viewChild.required<ElementRef<HTMLDialogElement>>("dialogElement");
-  private readonly submitBtnRef =
-    viewChild.required<ElementRef<HTMLDialogElement>>("submitBtnElement");
-  readonly initialInfo = input.required<{ columnId?: string; taskId?: string }>();
+  readonly initialInfo = input.required<{ columnId: string; taskId?: string }>();
   readonly closed = output<void>();
+  readonly selectedColumnChanged = output<string>();
 
   readonly columns = this.kanbanStore.columns;
   readonly selectedColumn = signal(this.columns()[0]);
   readonly selectedTags = signal<Task["tags"]>([]);
+  readonly isEditMode = signal(false);
   readonly color = computed<OmniSyncColors>(() => {
     return this.selectedColumn().color;
   });
 
-  protected addTaskForm = new FormGroup(
+  protected form = new FormGroup(
     {
       title: new FormControl("", {
         validators: [Validators.required],
@@ -76,39 +59,48 @@ export class AddTaskModal implements OnInit {
     { validators: dateRangeValidator },
   );
 
-  readonly minDueDate = toSignal(this.addTaskForm.controls.startDate.valueChanges, {
+  readonly minDueDate = toSignal(this.form.controls.startDate.valueChanges, {
     initialValue: new Date().toISOString().split("T")[0],
   });
 
   get titleIsInvalid(): boolean {
-    const title = this.addTaskForm.controls.title;
+    const title = this.form.controls.title;
     return title.invalid && title.touched && title.dirty;
   }
 
   get priorityIsInvalid(): boolean {
-    const priority = this.addTaskForm.controls.priority;
+    const priority = this.form.controls.priority;
     return priority.invalid && priority.touched && priority.dirty;
   }
 
   get columnIsInvalid(): boolean {
-    const column = this.addTaskForm.controls.column;
+    const column = this.form.controls.column;
     return column.invalid && column.touched && column.dirty;
   }
 
   get startDateIsInvalid(): boolean {
-    const startDate = this.addTaskForm.controls.startDate;
+    const startDate = this.form.controls.startDate;
     return startDate.invalid && startDate.touched && startDate.dirty;
   }
 
   get dueDateIsInvalid(): boolean {
-    const dueDate = this.addTaskForm.controls.dueDate;
+    const dueDate = this.form.controls.dueDate;
     return dueDate.invalid && dueDate.touched && dueDate.dirty;
   }
 
   constructor() {
-    afterNextRender(() => {
-      this.dialogRef().nativeElement.showModal();
+    this.form.controls.column.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      if (value) {
+        const column = this.kanbanStore.getColumnById(value);
 
+        if (column) {
+          this.selectedColumn.set(column);
+          this.emitSelectedColumnChanged();
+        }
+      }
+    });
+
+    afterNextRender(() => {
       const selectedCol = this.columns().find(
         (column) => this.initialInfo().columnId === column.id,
       );
@@ -123,56 +115,30 @@ export class AddTaskModal implements OnInit {
 
       if (selectedTask) {
         this.selectedTags.set(selectedTask.tags);
+        this.isEditMode.set(true);
 
-        const controls = this.addTaskForm.controls;
+        const controls = this.form.controls;
 
         controls.title.setValue(selectedTask.title);
         controls.priority.setValue(selectedTask.priority);
         controls.column.disable();
         controls.startDate.setValue(selectedTask.startDate.toISOString().split("T")[0]);
         controls.dueDate.setValue(selectedTask.dueDate.toISOString().split("T")[0]);
-
-        this.submitBtnRef().nativeElement.innerText = "Edit Task";
       }
 
-      this.addTaskForm.controls.column.setValue(this.selectedColumn().id);
+      this.form.controls.column.setValue(this.selectedColumn().id);
+      this.emitSelectedColumnChanged();
     });
-  }
-
-  ngOnInit() {
-    const subscription = this.addTaskForm.controls.column.valueChanges.subscribe((value) => {
-      if (value) {
-        const column = this.kanbanStore.getColumnById(value);
-
-        if (column) {
-          this.selectedColumn.set(column);
-        }
-      }
-    });
-
-    this.destroyRef.onDestroy(() => {
-      subscription.unsubscribe();
-    });
-  }
-
-  onClick(event: MouseEvent) {
-    if (event.target === event.currentTarget) {
-      this.dialogRef().nativeElement.close();
-    }
-  }
-
-  onDialogClosed() {
-    this.closed.emit();
   }
 
   onSubmit() {
-    if (this.addTaskForm.invalid) {
-      this.addTaskForm.markAllAsTouched();
-      this.addTaskForm.markAllAsDirty();
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.form.markAllAsDirty();
       return;
     }
 
-    const { title, priority, column, startDate, dueDate } = this.addTaskForm.getRawValue();
+    const { title, priority, column, startDate, dueDate } = this.form.getRawValue();
 
     if (!title || !priority || !column || !startDate || !dueDate) {
       return;
@@ -182,7 +148,7 @@ export class AddTaskModal implements OnInit {
     const due = new Date(dueDate);
 
     if (due < start) {
-      this.addTaskForm.controls.dueDate.setErrors({ beforeStart: true });
+      this.form.controls.dueDate.setErrors({ beforeStart: true });
       return;
     }
 
@@ -206,11 +172,19 @@ export class AddTaskModal implements OnInit {
       });
     }
 
-    this.onDialogClosed();
+    this.onModalClosed();
+  }
+
+  onModalClosed(): void {
+    this.closed.emit();
+  }
+
+  private emitSelectedColumnChanged(): void {
+    this.selectedColumnChanged.emit(this.selectedColumn().id);
   }
 
   addTag(): void {
-    const value = this.addTaskForm.controls.tags.value?.trim() ?? "";
+    const value = this.form.controls.tags.value?.trim() ?? "";
 
     if (!value) return;
 
@@ -231,7 +205,7 @@ export class AddTaskModal implements OnInit {
       },
     ]);
 
-    this.addTaskForm.controls.tags.setValue("");
+    this.form.controls.tags.setValue("");
   }
 
   onTagEnter(event: Event): void {
@@ -259,6 +233,26 @@ export class AddTaskModal implements OnInit {
 
   onTagClick(tagId: string): void {
     this.alternateTagColor(tagId);
+  }
+
+  onDropTag(event: CdkDragDrop<Task["tags"], Task["tags"], string>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    this.selectedTags.update((prev) => {
+      const result = [...prev];
+      moveItemInArray(result, event.previousIndex, event.currentIndex);
+      return result;
+    });
+  }
+
+  onDragStarted(): void {
+    document.body.classList.add("is-dragging");
+  }
+
+  onDragEnded(): void {
+    document.body.classList.remove("is-dragging");
   }
 }
 

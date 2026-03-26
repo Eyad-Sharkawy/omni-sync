@@ -1,0 +1,32 @@
+@reference "../../../../../styles.css";
+
+.input {
+  @apply bg-surface2 border-border text-primary w-full min-w-0 flex-1 rounded-lg border px-3.5 py-2.5 font-mono text-sm;
+}
+
+.input:focus-within {
+  @apply shadow-[var(--color)] outline outline-[var(--color)];
+}
+
+.label {
+  @apply text-muted font-mono text-[10px] tracking-[1.5px] uppercase;
+}
+
+.color-option {
+  @apply border-border bg-surface2 hover:bg-surface3 relative flex cursor-pointer items-center justify-center rounded-lg border py-2;
+}
+
+.color-option input {
+  @apply absolute h-0 w-0 opacity-0;
+}
+
+.color-dot {
+  @apply h-4 w-4 rounded-full;
+  background: var(--swatch);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--swatch), transparent 40%);
+}
+
+.color-option:has(input:checked) {
+  outline: 1px solid var(--swatch);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--swatch), transparent 45%);
+}

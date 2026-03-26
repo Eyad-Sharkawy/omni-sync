@@ -1,4 +1,4 @@
-@reference "../../../../styles.css";
+@reference "../../../../../styles.css";
 
 .input {
   @apply bg-surface2 border-border text-primary w-full min-w-0 flex-1 rounded-lg border px-3.5 py-2.5 font-mono text-sm;
@@ -28,7 +28,6 @@ input[type="date"] {
   background-position: right 0.75rem center;
 }
 
-/* Removes the icon in Chrome, Safari, and Edge */
 input[type="date"]::-webkit-calendar-picker-indicator {
   background: transparent;
   bottom: 0;
@@ -42,7 +41,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   width: auto;
 }
 
-/* Optional: Removes the "X" clear button in some browsers */
 input[type="date"]::-webkit-clear-button {
   display: none;
   -webkit-appearance: none;
@@ -53,9 +51,6 @@ input[type="date"]::-webkit-clear-button {
 
   input {
     @apply absolute m-0 h-0 w-0 opacity-0;
-  }
-
-  input:focus + label {
   }
 
   input:focus-visible + label {

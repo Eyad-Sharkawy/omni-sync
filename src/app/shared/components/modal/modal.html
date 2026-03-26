@@ -1,0 +1,33 @@
+<ng-template #modalTemplate>
+  <div
+    class="border-border text-primary bg-surface relative w-full max-w-130 overflow-x-hidden rounded-2xl border before:absolute before:top-0 before:left-0 before:h-0.5 before:w-full before:bg-[var(--color)]"
+    [style.--color]="'var(--color-os-' + color() + ')'"
+    role="dialog"
+    aria-modal="true"
+  >
+    <header class="flex items-center justify-between px-6 pt-5">
+      <div>
+        @if (badge()) {
+          <div
+            class="bg-surface2 border-border flex items-center gap-2 rounded-2xl border px-3 py-1"
+          >
+            <span class="shadow-[var(--color]) h-1.5 w-1.5 rounded-full bg-[var(--color)]"></span>
+            <span class="text-secondary text-sm tracking-[0.5px]">{{ badge() }}</span>
+          </div>
+        }
+
+        <h2 class="mt-3.5 text-lg font-extrabold -tracking-[0.3px]">{{ title() }}</h2>
+      </div>
+
+      <button
+        type="button"
+        class="bg-surface2 border-border text-secondary hover:bg-surface3 hover:text-primary -mt-3.5 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-lg border text-base focus-within:outline-[var(--color)] focus-visible:outline"
+        (click)="requestClose()"
+      >
+        ✕
+      </button>
+    </header>
+
+    <ng-content />
+  </div>
+</ng-template>

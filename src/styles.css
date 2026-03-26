@@ -88,6 +88,12 @@
   --shadow-btn-glow: 0 4px 24px rgba(108, 99, 255, 0.4);
 }
 
+/* Draggable Elements style */
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+}
+
 /* Global nice dark scrollbar */
 * {
   scrollbar-width: thin; /* Firefox */
@@ -111,4 +117,8 @@
 
 *::-webkit-scrollbar-thumb:hover {
   background: #6c63ff;
+}
+
+.os-modal-backdrop {
+  background: rgba(0, 0, 0, 0.4);
 }
