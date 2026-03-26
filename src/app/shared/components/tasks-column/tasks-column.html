@@ -11,16 +11,28 @@
     }}</span>
   </div>
 
-  <button
-    (click)="onAddTask()"
-    title="Add Task"
-    class="text-muted hover:bg-surface3 hover:text-primary cursor-pointer rounded-md px-1.5 py-0.5 text-lg tracking-[0.5px]"
-  >
-    +
-  </button>
+  <div class="flex gap-2">
+    <button
+      type="button"
+      title="Delete task"
+      (click)="onDelete()"
+      class="hover:bg-surface3 cursor-pointer rounded-md p-0.5"
+    >
+      <img ngSrc="/images/icons/trash-can.svg" alt="Delete Task" width="15" height="15" />
+    </button>
+
+    <button
+      type="button"
+      title="Edit task"
+      (click)="onEdit()"
+      class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5"
+    >
+      <img ngSrc="/images/icons/edit-button.svg" alt="Edit task" width="15" height="15" />
+    </button>
+  </div>
 </header>
 
-<div class="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-3.5">
+<div class="tasks-list flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto p-3.5">
   <ng-content select="os-task-card" />
 </div>
 

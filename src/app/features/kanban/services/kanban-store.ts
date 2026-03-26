@@ -5,6 +5,7 @@ import { Storage } from "../../../core/services/storage";
 import { Column } from "../../../core/models/column";
 import { Task } from "../../../core/models/task";
 import { generateId } from "../../../shared/functions/generate-id";
+import { OmniSyncColors } from "../../../shared/UI/colors";
 
 export interface CreateTaskInput {
   title: string;
@@ -12,6 +13,16 @@ export interface CreateTaskInput {
   startDate: Date;
   dueDate: Date;
   tags?: Task["tags"];
+}
+
+export interface CreateColumnInput {
+  header: string;
+  color: OmniSyncColors;
+}
+
+export interface UpdateColumnInput {
+  header?: string;
+  color?: OmniSyncColors;
 }
 
 @Injectable()
@@ -73,6 +84,35 @@ export class KanbanStore {
     return this.columns().find((column) => column.id === columnId);
   }
 
+  addColumn(columnInput: CreateColumnInput) {
+    const board = this.currentBoard();
+
+    if (!board) {
+      return;
+    }
+
+    const column: Column = {
+      id: generateId(),
+      header: columnInput.header,
+      color: columnInput.color,
+      tasks: [],
+    };
+
+    this.patchCurrentBoard((current) => ({
+      ...current,
+      columns: [...current.columns, column],
+    }));
+  }
+
+  updateColumn(columnId: string, patch: UpdateColumnInput): void {
+    this.patchCurrentBoard((current) => ({
+      ...current,
+      columns: current.columns.map((column) =>
+        column.id === columnId ? { ...column, ...patch } : column,
+      ),
+    }));
+  }
+
   addTask(columnId: string, taskInput: CreateTaskInput): void {
     const board = this.currentBoard();
 
@@ -124,43 +164,87 @@ export class KanbanStore {
     }));
   }
 
-  moveTask(taskId: string, fromColumnId: string, toColumnId: string) {
-    if (fromColumnId === toColumnId) {
-      return;
-    }
-
+  moveTask(
+    taskId: string,
+    fromColumnId: string,
+    toColumnId: string,
+    fromIndex: number,
+    toIndex: number,
+  ): void {
     this.patchCurrentBoard((current) => {
-      let movedTask: Task | undefined;
+      const sourceColumn = current.columns.find((column) => column.id === fromColumnId);
+      const targetColumn = current.columns.find((column) => column.id === toColumnId);
 
-      const columnsWithoutTask = current.columns.map((column) => {
-        if (column.id !== fromColumnId) {
-          return column;
-        }
-
-        const nextTasks = column.tasks.filter((task) => {
-          const keep = task.id !== taskId;
-
-          if (!keep) {
-            movedTask = task;
-          }
-
-          return keep;
-        });
-
-        return { ...column, tasks: nextTasks };
-      });
-
-      if (!movedTask) {
+      if (!sourceColumn || !targetColumn) {
         return current;
       }
 
+      const sourceTasks = [...sourceColumn.tasks];
+      const safeFromIndex = Math.max(0, Math.min(fromIndex, sourceTasks.length - 1));
+      const movedTask = sourceTasks[safeFromIndex];
+
+      if (!movedTask || movedTask.id !== taskId) {
+        return current;
+      }
+
+      sourceTasks.splice(safeFromIndex, 1);
+
+      if (fromColumnId === toColumnId) {
+        const safeToIndex = Math.max(0, Math.min(toIndex, sourceTasks.length));
+        sourceTasks.splice(safeToIndex, 0, movedTask);
+
+        return {
+          ...current,
+          columns: current.columns.map((column) =>
+            column.id === fromColumnId ? { ...column, tasks: sourceTasks } : column,
+          ),
+        };
+      }
+
+      const targetTasks = [...targetColumn.tasks];
+      const safeToIndex = Math.max(0, Math.min(toIndex, targetTasks.length));
+      targetTasks.splice(safeToIndex, 0, movedTask);
+
       return {
         ...current,
-        columns: columnsWithoutTask.map((column) =>
-          column.id === toColumnId ? { ...column, tasks: [...column.tasks, movedTask!] } : column,
-        ),
+        columns: current.columns.map((column) => {
+          if (column.id === fromColumnId) {
+            return { ...column, tasks: sourceTasks };
+          }
+
+          if (column.id === toColumnId) {
+            return { ...column, tasks: targetTasks };
+          }
+
+          return column;
+        }),
       };
     });
+  }
+
+  moveColumn(fromIndex: number, toIndex: number): void {
+    this.patchCurrentBoard((current) => {
+      const columns = [...current.columns];
+      const safeFromIndex = Math.max(0, Math.min(fromIndex, columns.length - 1));
+      const movedColumn = columns[safeFromIndex];
+      const safeToIndex = Math.max(0, Math.min(toIndex, columns.length - 1));
+
+      if (!movedColumn) {
+        return current;
+      }
+
+      columns.splice(safeFromIndex, 1);
+      columns.splice(safeToIndex, 0, movedColumn);
+
+      return { ...current, columns };
+    });
+  }
+
+  removeColumn(columnId: string): void {
+    this.patchCurrentBoard((current) => ({
+      ...current,
+      columns: current.columns.filter((column) => column.id !== columnId),
+    }));
   }
 
   private patchCurrentBoard(updater: (board: Board) => Board): void {

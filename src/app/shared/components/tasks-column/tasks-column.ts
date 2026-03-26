@@ -8,10 +8,11 @@ import {
 } from "@angular/core";
 import { OmniSyncColors } from "../../UI/colors";
 import { TaskCard } from "../task-card/task-card";
+import { NgOptimizedImage } from "@angular/common";
 
 @Component({
   selector: "os-tasks-column",
-  imports: [],
+  imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./tasks-column.html",
   styleUrl: "./tasks-column.css",
@@ -23,7 +24,17 @@ export class TasksColumn {
   taskCards = contentChildren(TaskCard);
   numberOfTasks = computed(() => this.taskCards().length);
   color = input.required<OmniSyncColors>();
+  delete = output();
+  edit = output();
   addTask = output();
+
+  onDelete() {
+    this.delete.emit();
+  }
+
+  onEdit() {
+    this.edit.emit();
+  }
 
   onAddTask() {
     this.addTask.emit();

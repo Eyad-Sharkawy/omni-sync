@@ -1,6 +1,7 @@
 import { inject, Injectable } from "@angular/core";
 import { LOCAL_STORAGE } from "../tokens/local-storage";
 import { Board } from "../models/board";
+import { generateId } from "../../shared/functions/generate-id";
 
 @Injectable({
   providedIn: "root",
@@ -12,17 +13,17 @@ export class Storage {
   private createInitialBoards(options: { persist: boolean } = { persist: true }): Board[] {
     const initialBoards: Board[] = [
       {
-        id: "board-product-ops-q1-2026",
+        id: generateId(),
         name: "Product Ops Board",
         columns: [
           {
-            id: "todo",
+            id: generateId(),
             header: "To do",
             color: "indigo",
             tasks: [],
           },
           {
-            id: "in-progress",
+            id: generateId(),
             header: "In progress",
             color: "amber",
             tasks: [],
@@ -34,7 +35,7 @@ export class Storage {
             tasks: [],
           },
           {
-            id: "done",
+            id: generateId(),
             header: "Done",
             color: "mint",
             tasks: [],

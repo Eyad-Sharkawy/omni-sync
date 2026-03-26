@@ -1,0 +1,13 @@
+@reference "../../../../styles.css";
+
+:host {
+  @apply bg-surface2 border-border rounded-lg p-3.5;
+}
+
+:host.cdk-drag-preview {
+  @apply text-primary opacity-85;
+}
+
+:host.cdk-drag-placeholder {
+  @apply border-border border border-dashed opacity-30;
+}

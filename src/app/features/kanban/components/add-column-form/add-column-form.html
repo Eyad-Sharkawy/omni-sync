@@ -1,0 +1,61 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 px-6 pt-5 pb-6">
+  <div class="flex flex-col gap-1.5">
+    <label for="task-title" class="label">Column header</label>
+    <input
+      formControlName="header"
+      id="task-title"
+      type="text"
+      inputmode="text"
+      enterkeyhint="done"
+      autocomplete="off"
+      placeholder="Enter column header"
+      class="input"
+      required
+    />
+    @if (headerIsInvalid) {
+      <p class="text-danger text-sm">Add a header for this column</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <label for="column-color" class="label">Column Color</label>
+    <div class="grid grid-cols-4 gap-2">
+      @for (colorOption of colorOptions; track $index) {
+        <label class="color-option" [style.--swatch]="'var(--color-os-' + colorOption + ')'">
+          <input
+            formControlName="color"
+            type="radio"
+            [id]="'column-color-' + colorOption"
+            name="color"
+            [value]="colorOption"
+            [checked]="$index === 0"
+          />
+          <span aria-hidden="true" class="color-dot"></span>
+        </label>
+      }
+    </div>
+
+    @if (colorIsInvalid) {
+      <p class="text-danger text-sm">Select a color for this column</p>
+    }
+  </div>
+
+  <hr class="text-border" />
+
+  <div class="flex justify-end gap-2 font-mono text-[12px]">
+    <button
+      type="button"
+      (click)="onModalClosed()"
+      class="border-border text-secondary hover:bg-surface2 hover:text-primary cursor-pointer rounded-lg border bg-transparent px-4.5 py-2 focus-within:outline-[var(--color)] focus-visible:outline"
+    >
+      Cancel
+    </button>
+
+    <button
+      type="submit"
+      class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
+    >
+      {{ isEditMode ? "Edit column" : "Add column" }}
+    </button>
+  </div>
+</form>
