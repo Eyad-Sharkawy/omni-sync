@@ -101,8 +101,43 @@
     @apply bg-surface text-muted cursor-not-allowed;
   }
 
-  .os-date-input {
+  select.os-form-input {
     @apply cursor-pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2372728a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px 8px;
+  }
+
+  .os-date-input {
+    @apply relative w-full min-w-0 cursor-pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.25rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M8 2v4M16 2v4M3 10h18M5 6h14a2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z' stroke='%2372728a' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px 12px;
+  }
+
+  .os-date-input::-webkit-calendar-picker-indicator {
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+  }
+
+  .os-date-input::-webkit-clear-button {
+    display: none;
+    -webkit-appearance: none;
   }
 
   .os-radio-wrap {
@@ -110,7 +145,7 @@
   }
 
   .os-radio-input {
-    @apply absolute inset-0 m-0 opacity-0;
+    @apply absolute inset-0 m-0 cursor-pointer opacity-0;
   }
 
   .os-radio-label {
@@ -153,7 +188,7 @@
   }
 
   .os-color-input {
-    @apply absolute inset-0 opacity-0;
+    @apply absolute inset-0 cursor-pointer opacity-0;
   }
 
   .os-color-dot {
