@@ -1,4 +1,13 @@
-import { afterNextRender, Component, computed, inject, input, output, signal } from "@angular/core";
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  output,
+  signal,
+} from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import {
   AbstractControl,
@@ -20,6 +29,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from "@angular/cdk
 @Component({
   selector: "os-add-task-form",
   imports: [ReactiveFormsModule, TaskTag, CdkDrag, CdkDropList],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./add-task-form.html",
   styleUrl: "./add-task-form.css",
 })
