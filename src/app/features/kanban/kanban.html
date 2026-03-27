@@ -103,7 +103,7 @@
 @switch (selectedModal()) {
   @case ("addTask") {
     <os-modal
-      title="Add new task"
+      [title]="addTaskModalInfo()?.taskId ? 'Edit task' : 'Add new task'"
       [badge]="modalBadge()"
       [color]="modalColor()"
       (closed)="closeModal()"
