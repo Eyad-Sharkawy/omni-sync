@@ -82,11 +82,11 @@ export class Kanban {
   });
 
   modalBadge = computed(() => this.modalColumn()?.header ?? "");
-  modalColor = signal<OmniSyncColors>("zinc");
+  modalColor = signal<OmniSyncColors>("indigo");
 
   constructor() {
     effect(() => {
-      this.modalColor.set(this.modalColumn()?.color ?? "zinc");
+      this.modalColor.set(this.modalColumn()?.color ?? "indigo");
     });
 
     this.destroyRef.onDestroy(() => {
