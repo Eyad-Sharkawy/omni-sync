@@ -1,9 +1,13 @@
 <ng-template #modalTemplate>
   <div
-    class="border-border text-primary bg-surface relative w-full max-w-130 overflow-x-hidden rounded-2xl border before:absolute before:top-0 before:left-0 before:h-0.5 before:w-full before:bg-[var(--color)]"
+    #dialogRoot
+    class="border-border text-primary bg-surface relative w-full max-w-130 overflow-x-hidden rounded-2xl border before:absolute before:top-0 before:left-0 before:h-0.5 before:w-full before:bg-[var(--color)] focus:outline-none"
     [style.--color]="'var(--color-os-' + color() + ')'"
+    cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="false"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
   >
     <header class="flex items-center justify-between px-6 pt-5">
       <div>

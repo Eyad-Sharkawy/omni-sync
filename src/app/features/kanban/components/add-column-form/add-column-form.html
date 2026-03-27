@@ -1,6 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 px-6 pt-5 pb-6">
   <div class="flex flex-col gap-1.5">
-    <label for="task-title" class="label">Column header</label>
+    <label for="task-title" class="os-form-label"> Column header </label>
     <input
       formControlName="header"
       id="task-title"
@@ -9,7 +9,7 @@
       enterkeyhint="done"
       autocomplete="off"
       placeholder="Enter column header"
-      class="input"
+      class="os-form-input"
       required
     />
     @if (headerIsInvalid) {
@@ -18,10 +18,10 @@
   </div>
 
   <div class="flex flex-col gap-2">
-    <label for="column-color" class="label">Column Color</label>
+    <label for="column-color" class="os-form-label"> Column Color </label>
     <div class="grid grid-cols-4 gap-2">
       @for (colorOption of colorOptions; track $index) {
-        <label class="color-option" [style.--swatch]="'var(--color-os-' + colorOption + ')'">
+        <label class="os-color-option" [style.--swatch]="'var(--color-os-' + colorOption + ')'">
           <input
             formControlName="color"
             type="radio"
@@ -29,8 +29,9 @@
             name="color"
             [value]="colorOption"
             [checked]="$index === 0"
+            class="os-color-input"
           />
-          <span aria-hidden="true" class="color-dot"></span>
+          <span aria-hidden="true" class="os-color-dot"></span>
         </label>
       }
     </div>
