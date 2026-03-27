@@ -1,4 +1,9 @@
-<main class="flex h-full min-h-0 flex-col overflow-x-auto px-8 py-9">
+<main
+  #boardScroll
+  cdkScrollable
+  (wheel)="onBoardWheel($event)"
+  class="flex h-full min-h-0 flex-col overflow-x-auto px-8 py-9"
+>
   <header class="mb-6 flex w-max min-w-full items-center gap-2">
     <h2 class="text-secondary text-sm font-bold">
       {{ board().name }}
@@ -42,6 +47,7 @@
         cdkDrag
         [cdkDragData]="column"
         (cdkDragStarted)="onDragStarted()"
+        (cdkDragMoved)="onDragMoved($event)"
         (cdkDragEnded)="onDragEnded()"
       >
         <ng-container ngProjectAs="Header">
@@ -56,6 +62,7 @@
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted()"
+            (cdkDragMoved)="onDragMoved($event)"
             (cdkDragEnded)="onDragEnded()"
             class="cursor-grab"
           >

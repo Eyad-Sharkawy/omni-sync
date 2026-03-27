@@ -1,7 +1,23 @@
-import { Component, computed, effect, inject, signal } from "@angular/core";
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from "@angular/core";
 import { DatePipe } from "@angular/common";
 
-import { CdkDrag, CdkDragDrop, CdkDropList, CdkDropListGroup } from "@angular/cdk/drag-drop";
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragMove,
+  CdkDropList,
+  CdkDropListGroup,
+} from "@angular/cdk/drag-drop";
+import { CdkScrollable } from "@angular/cdk/scrolling";
 
 import { TaskCard } from "../../shared/components/task-card/task-card";
 import { TasksColumn } from "../../shared/components/tasks-column/tasks-column";
@@ -33,6 +49,7 @@ type ModalType = "addTask" | "addColumn";
     CdkDrag,
     CdkDropList,
     CdkDropListGroup,
+    CdkScrollable,
     AddColumnForm,
   ],
   templateUrl: "./kanban.html",
@@ -40,6 +57,14 @@ type ModalType = "addTask" | "addColumn";
 })
 export class Kanban {
   private readonly kanbanStore = inject(KanbanStore);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly boardScroll = viewChild.required<ElementRef<HTMLElement>>("boardScroll");
+  private readonly edgeThreshold = 80;
+  private readonly maxScrollStep = 24;
+  private readonly autoScrollFrame = signal<number | null>(null);
+  private readonly latestPointer = signal({ x: 0, y: 0 });
+  private readonly isDragging = signal(false);
 
   selectedModal = signal<ModalType | null>(null);
 
@@ -62,6 +87,10 @@ export class Kanban {
   constructor() {
     effect(() => {
       this.modalColor.set(this.modalColumn()?.color ?? "zinc");
+    });
+
+    this.destroyRef.onDestroy(() => {
+      this.stopAutoScrollLoop();
     });
   }
 
@@ -102,11 +131,19 @@ export class Kanban {
   }
 
   onDragStarted(): void {
+    this.isDragging.set(true);
     document.body.classList.add("is-dragging");
+    this.startAutoScrollLoop();
   }
 
   onDragEnded(): void {
+    this.isDragging.set(false);
     document.body.classList.remove("is-dragging");
+    this.stopAutoScrollLoop();
+  }
+
+  onDragMoved(event: CdkDragMove<Column | Task>): void {
+    this.latestPointer.set(event.pointerPosition);
   }
 
   isColumnDrop = (drag: CdkDrag<Column | Task>) => {
@@ -158,6 +195,39 @@ export class Kanban {
     this.modalColor.set(color);
   }
 
+  onBoardWheel(event: WheelEvent): void {
+    const target = event.target as HTMLElement | null;
+    const taskList = target?.closest(".tasks-list") as HTMLElement | null;
+
+    if (taskList) {
+      const verticalDelta = event.deltaY || event.deltaX;
+
+      if (verticalDelta !== 0) {
+        const isVerticallyScrollable = taskList.scrollHeight > taskList.clientHeight;
+
+        if (isVerticallyScrollable) {
+          taskList.scrollTop += verticalDelta;
+          event.preventDefault();
+          return;
+        }
+      }
+    }
+
+    const boardElement = this.boardScroll().nativeElement;
+    const horizontalDelta =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (horizontalDelta === 0) {
+      return;
+    }
+
+    const previousScrollLeft = boardElement.scrollLeft;
+    boardElement.scrollLeft += horizontalDelta;
+
+    if (boardElement.scrollLeft !== previousScrollLeft) {
+      event.preventDefault();
+    }
+  }
+
   private openModal(taskInfo?: ModalTaskInfo) {
     if (taskInfo) {
       const column = this.kanbanStore.getColumnById(taskInfo.columnId);
@@ -174,5 +244,68 @@ export class Kanban {
     } else {
       this.selectedModal.set("addColumn");
     }
+  }
+
+  private startAutoScrollLoop(): void {
+    if (this.autoScrollFrame() !== null) {
+      return;
+    }
+
+    const tick = () => {
+      if (!this.isDragging()) {
+        this.autoScrollFrame.set(null);
+        return;
+      }
+
+      this.applyEdgeScroll();
+      this.autoScrollFrame.set(requestAnimationFrame(tick));
+    };
+
+    this.autoScrollFrame.set(requestAnimationFrame(tick));
+  }
+
+  private stopAutoScrollLoop(): void {
+    const scrollFrame = this.autoScrollFrame();
+    if (scrollFrame !== null) {
+      cancelAnimationFrame(scrollFrame);
+      this.autoScrollFrame.set(null);
+    }
+  }
+
+  private applyEdgeScroll(): void {
+    const boardElement = this.boardScroll().nativeElement;
+    const boardRect = boardElement.getBoundingClientRect();
+
+    const leftEdgeDistance = boardRect.left + this.edgeThreshold - this.latestPointer().x;
+    const rightEdgeDistance = this.latestPointer().x - (boardRect.right - this.edgeThreshold);
+
+    if (leftEdgeDistance > 0) {
+      boardElement.scrollLeft -= this.resolveScrollStep(leftEdgeDistance);
+    } else if (rightEdgeDistance > 0) {
+      boardElement.scrollLeft += this.resolveScrollStep(rightEdgeDistance);
+    }
+
+    const targetElement = document.elementFromPoint(this.latestPointer().x, this.latestPointer().y);
+    const taskList = targetElement?.closest(".tasks-list") as HTMLElement | null;
+
+    if (taskList) {
+      const taskListRect = taskList.getBoundingClientRect();
+      const topEdgeDistance = taskListRect.top + this.edgeThreshold - this.latestPointer().y;
+      const bottomEdgeDistance =
+        this.latestPointer().y - (taskListRect.bottom - this.edgeThreshold);
+
+      if (topEdgeDistance > 0) {
+        taskList.scrollTop -= this.resolveScrollStep(topEdgeDistance);
+      } else if (bottomEdgeDistance > 0) {
+        taskList.scrollTop += this.resolveScrollStep(bottomEdgeDistance);
+      }
+    }
+  }
+
+  private resolveScrollStep(distanceToEdge: number): number {
+    const clampedDistance = Math.min(this.edgeThreshold, Math.max(0, distanceToEdge));
+    const intensity = clampedDistance / this.edgeThreshold;
+
+    return Math.ceil(intensity * this.maxScrollStep);
   }
 }
