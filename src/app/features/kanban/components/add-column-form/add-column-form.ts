@@ -31,7 +31,7 @@ export class AddColumnForm {
     header: new FormControl("", {
       validators: [Validators.required],
     }),
-    color: new FormControl<OmniSyncColors>("zinc", {
+    color: new FormControl<OmniSyncColors>("indigo", {
       validators: [Validators.required],
     }),
   });
@@ -57,7 +57,7 @@ export class AddColumnForm {
       const selectedColumnInfo = this.selectedColumnInfo();
 
       if (!selectedColumnInfo) {
-        this.form.reset({ header: "", color: "zinc" });
+        this.form.reset({ header: "", color: "indigo" });
         return;
       }
 
