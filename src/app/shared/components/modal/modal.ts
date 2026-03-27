@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   inject,
@@ -18,6 +19,7 @@ import { OmniSyncColors } from "../../UI/colors";
 @Component({
   selector: "os-modal",
   imports: [CdkTrapFocus],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./modal.html",
   styleUrl: "./modal.css",
   host: {

@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, output } from "@angular/core";
+import { ChangeDetectionStrategy, Component, effect, inject, input, output } from "@angular/core";
 import {
   FormControl,
   FormGroup,
@@ -14,6 +14,7 @@ import { KanbanStore } from "../../services/kanban-store";
 @Component({
   selector: "os-add-column-form",
   imports: [FormsModule, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./add-column-form.html",
   styleUrl: "./add-column-form.css",
 })
