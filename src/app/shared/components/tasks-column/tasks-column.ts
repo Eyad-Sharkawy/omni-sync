@@ -6,13 +6,14 @@ import {
   input,
   output,
 } from "@angular/core";
+import { CdkDragHandle } from "@angular/cdk/drag-drop";
 import { OmniSyncColors } from "../../UI/colors";
 import { TaskCard } from "../task-card/task-card";
 import { NgOptimizedImage } from "@angular/common";
 
 @Component({
   selector: "os-tasks-column",
-  imports: [NgOptimizedImage],
+  imports: [NgOptimizedImage, CdkDragHandle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./tasks-column.html",
   styleUrl: "./tasks-column.css",
