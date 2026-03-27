@@ -1,6 +1,7 @@
 import {
   afterNextRender,
   Component,
+  ElementRef,
   inject,
   input,
   OnDestroy,
@@ -11,10 +12,12 @@ import {
 } from "@angular/core";
 import { Overlay, OverlayRef } from "@angular/cdk/overlay";
 import { TemplatePortal } from "@angular/cdk/portal";
+import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { OmniSyncColors } from "../../UI/colors";
 
 @Component({
   selector: "os-modal",
+  imports: [CdkTrapFocus],
   templateUrl: "./modal.html",
   styleUrl: "./modal.css",
   host: {
@@ -25,6 +28,7 @@ export class Modal implements OnDestroy {
   private readonly overlay = inject(Overlay);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly modalTemplate = viewChild.required<TemplateRef<unknown>>("modalTemplate");
+  private readonly dialogRoot = viewChild.required<ElementRef<HTMLElement>>("dialogRoot");
   private overlayRef: OverlayRef | null = null;
 
   readonly title = input.required<string>();
@@ -45,6 +49,7 @@ export class Modal implements OnDestroy {
 
       const portal = new TemplatePortal(this.modalTemplate(), this.viewContainerRef);
       this.overlayRef.attach(portal);
+      queueMicrotask(() => this.dialogRoot().nativeElement.focus({ preventScroll: true }));
 
       this.overlayRef.backdropClick().subscribe(() => this.requestClose());
       this.overlayRef.keydownEvents().subscribe((event) => {

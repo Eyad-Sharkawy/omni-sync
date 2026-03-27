@@ -5,7 +5,7 @@
   class="flex flex-col gap-4 px-6 pt-5 pb-6"
 >
   <div class="flex flex-col gap-1.5">
-    <label for="task-title" class="label">Task Title</label>
+    <label for="task-title" class="os-form-label"> Task Title </label>
     <input
       formControlName="title"
       id="task-title"
@@ -14,7 +14,7 @@
       enterkeyhint="done"
       autocomplete="off"
       placeholder="Enter task title"
-      class="input"
+      class="os-form-input"
       required
     />
     @if (titleIsInvalid) {
@@ -25,40 +25,49 @@
   <hr class="text-border" />
 
   <fieldset class="flex flex-col gap-2">
-    <legend class="label">Priority</legend>
+    <legend class="os-form-label">Priority</legend>
 
     <div class="mt-1.5 flex gap-2">
-      <div class="priority-radio">
+      <div class="os-radio-wrap low">
         <input
+          class="os-radio-input"
           formControlName="priority"
           type="radio"
           name="priority"
           value="low"
           id="low-priority-radio"
         />
-        <label for="low-priority-radio"> <span class="bg-priority-low"></span> Low </label>
+        <label for="low-priority-radio" class="os-radio-label">
+          <span class="os-radio-dot bg-priority-low"></span> Low
+        </label>
       </div>
 
-      <div class="priority-radio flex-1">
+      <div class="os-radio-wrap medium">
         <input
+          class="os-radio-input"
           formControlName="priority"
           type="radio"
           name="priority"
           value="medium"
           id="medium-priority-radio"
         />
-        <label for="medium-priority-radio"> <span class="bg-priority-medium"></span> Medium </label>
+        <label for="medium-priority-radio" class="os-radio-label">
+          <span class="os-radio-dot bg-priority-medium"></span> Medium
+        </label>
       </div>
 
-      <div class="priority-radio flex-1">
+      <div class="os-radio-wrap high">
         <input
+          class="os-radio-input"
           formControlName="priority"
           type="radio"
           name="priority"
           value="high"
           id="high-priority-radio"
         />
-        <label for="high-priority-radio"> <span class="bg-priority-high"></span> High </label>
+        <label for="high-priority-radio" class="os-radio-label">
+          <span class="os-radio-dot bg-priority-high"></span> High
+        </label>
       </div>
     </div>
 
@@ -68,8 +77,14 @@
   </fieldset>
 
   <div class="flex flex-col gap-1.5">
-    <label for="column-input" class="label">Column</label>
-    <select formControlName="column" name="column-name" id="column-input" class="input" required>
+    <label for="column-input" class="os-form-label"> Column </label>
+    <select
+      formControlName="column"
+      name="column-name"
+      id="column-input"
+      class="os-form-input"
+      required
+    >
       @for (column of columns(); track column.id) {
         <option [value]="column.id">
           {{ column.header }}
@@ -83,7 +98,7 @@
   </div>
 
   <div class="flex flex-col gap-1.5">
-    <label for="tags-input" class="label">Tags</label>
+    <label for="tags-input" class="os-form-label"> Tags </label>
     @if (selectedTags().length !== 0) {
       <div
         class="mb-3 flex flex-wrap gap-1.5"
@@ -119,13 +134,19 @@
       autocomplete="off"
       id="tags-input"
       placeholder="Add tag..."
-      class="input"
+      class="os-form-input"
     />
   </div>
 
   <div class="flex flex-col gap-1.5">
-    <label for="start-date-input" class="label">Start Date</label>
-    <input formControlName="startDate" type="date" id="start-date-input" class="input" required />
+    <label for="start-date-input" class="os-form-label"> Start Date </label>
+    <input
+      formControlName="startDate"
+      type="date"
+      id="start-date-input"
+      class="os-form-input os-date-input"
+      required
+    />
 
     @if (startDateIsInvalid) {
       <p class="text-danger text-sm">select a valid start date</p>
@@ -133,13 +154,13 @@
   </div>
 
   <div class="flex flex-col gap-1.5">
-    <label for="due-date-input" class="label">Due Date</label>
+    <label for="due-date-input" class="os-form-label"> Due Date </label>
     <input
       formControlName="dueDate"
       [min]="minDueDate()"
       type="date"
       id="due-date-input"
-      class="input"
+      class="os-form-input os-date-input"
       required
     />
 
