@@ -8,10 +8,11 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
-import { DatePipe } from "@angular/common";
+import { DatePipe, NgOptimizedImage } from "@angular/common";
 
 import {
   CdkDrag,
+  CdkDragHandle,
   CdkDragDrop,
   CdkDragMove,
   CdkDropList,
@@ -26,16 +27,21 @@ import { KanbanStore } from "./services/kanban-store";
 import { Modal } from "../../shared/components/modal/modal";
 import { Column } from "../../core/models/column";
 import { Task } from "../../core/models/task";
+import { Board } from "../../core/models/board";
 import { AddTaskForm } from "./components/add-task-form/add-task-form";
 import { OmniSyncColors } from "../../shared/UI/colors";
 import { AddColumnForm } from "./components/add-column-form/add-column-form";
+import { CreateBoardForm } from "./components/create-board-form/create-board-form";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
 
 interface ModalTaskInfo {
   columnId: string;
   taskId?: string;
 }
 
-type ModalType = "addTask" | "addColumn";
+type ModalType = "addTask" | "addColumn" | "addBoard";
 
 @Component({
   selector: "os-kanban",
@@ -44,18 +50,30 @@ type ModalType = "addTask" | "addColumn";
     TasksColumn,
     TaskTag,
     DatePipe,
+    NgOptimizedImage,
     Modal,
     AddTaskForm,
     CdkDrag,
+    CdkDragHandle,
     CdkDropList,
     CdkDropListGroup,
     CdkScrollable,
     AddColumnForm,
+    CreateBoardForm,
+    RouterLink,
   ],
   templateUrl: "./kanban.html",
   styleUrl: "./kanban.css",
 })
 export class Kanban {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  private readonly routeBoardId = toSignal(
+    this.route.paramMap.pipe(map((prams) => prams.get("boardId"))),
+    { initialValue: null },
+  );
+
   private readonly kanbanStore = inject(KanbanStore);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -66,12 +84,15 @@ export class Kanban {
   private readonly latestPointer = signal({ x: 0, y: 0 });
   private readonly isDragging = signal(false);
 
-  selectedModal = signal<ModalType | null>(null);
+  readonly selectedModal = signal<ModalType | null>(null);
+  readonly showViewBoardModal = signal<boolean>(false);
 
-  board = this.kanbanStore.currentBoard;
+  readonly boards = this.kanbanStore.boards;
+  readonly currentBoard = this.kanbanStore.currentBoard;
   columns = this.kanbanStore.columns;
   addTaskModalInfo = signal<ModalTaskInfo | null>(null);
   addColumnModalInfo = signal<ModalTaskInfo | null>(null);
+  editBoardModalId = signal<string | null>(null);
   modalColumn = computed(() => {
     const modalInfo = this.addTaskModalInfo() ?? this.addColumnModalInfo();
     if (!modalInfo) {
@@ -85,6 +106,29 @@ export class Kanban {
   modalColor = signal<OmniSyncColors>("indigo");
 
   constructor() {
+    effect(() => {
+      const boards = this.boards();
+      const boardId = this.routeBoardId();
+
+      if (boards.length === 0) {
+        return;
+      }
+
+      if (!boardId) {
+        this.router.navigate(["/kanban", boards[0].id], { replaceUrl: true });
+        return;
+      }
+
+      const exists = boards.some((board) => board.id === boardId);
+
+      if (!exists) {
+        this.router.navigate(["/kanban", boards[0].id], { replaceUrl: true });
+        return;
+      }
+
+      this.kanbanStore.setCurrentBoard(boardId);
+    });
+
     effect(() => {
       this.modalColor.set(this.modalColumn()?.color ?? "indigo");
     });
@@ -108,6 +152,39 @@ export class Kanban {
     this.openModal(taskInfo);
   }
 
+  onAddBoard(): void {
+    this.editBoardModalId.set(null);
+    this.showViewBoardModal.set(false);
+    this.selectedModal.set("addBoard");
+  }
+
+  onBoardCreated(boardId: string): void {
+    this.closeModal();
+    this.router.navigate(["/kanban", boardId]);
+  }
+
+  onEditBoard(boardId: string): void {
+    this.editBoardModalId.set(boardId);
+    this.showViewBoardModal.set(false);
+    this.selectedModal.set("addBoard");
+  }
+
+  onDeleteBoard(boardId: string): void {
+    if (this.boards().length <= 1) {
+      return;
+    }
+
+    this.kanbanStore.removeBoard(boardId);
+  }
+
+  onDropBoard(event: CdkDragDrop<Board[]>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    this.kanbanStore.moveBoard(event.previousIndex, event.currentIndex);
+  }
+
   onEditTask(taskInfo: ModalTaskInfo) {
     this.openModal(taskInfo);
   }
@@ -115,7 +192,9 @@ export class Kanban {
   closeModal() {
     this.addTaskModalInfo.set(null);
     this.addColumnModalInfo.set(null);
+    this.editBoardModalId.set(null);
     this.selectedModal.set(null);
+    this.showViewBoardModal.set(false);
   }
 
   onModalColumnChanged(columnId: string): void {
@@ -226,6 +305,10 @@ export class Kanban {
     if (boardElement.scrollLeft !== previousScrollLeft) {
       event.preventDefault();
     }
+  }
+
+  onViewBoards() {
+    this.showViewBoardModal.update((prev) => !prev);
   }
 
   private openModal(taskInfo?: ModalTaskInfo) {

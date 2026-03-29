@@ -1,0 +1,13 @@
+@reference "../../../styles.css";
+
+:host {
+  @apply text-muted flex font-mono text-[12.5px] tracking-[.2px];
+}
+
+.active-link {
+  @apply text-primary bg-surface2 pointer-events-none relative cursor-default;
+
+  &::before {
+    @apply bg-os-indigo absolute top-1/2 left-0 h-5 w-1 -translate-y-1/2 transform rounded-r-sm content-[""];
+  }
+}

@@ -25,6 +25,18 @@ export interface UpdateColumnInput {
   color?: OmniSyncColors;
 }
 
+export interface CreateBoardInput {
+  name: string;
+  startDate: Date;
+  dueDate: Date;
+}
+
+export interface UpdateBoardInput {
+  name?: string;
+  startDate?: Date;
+  dueDate?: Date;
+}
+
 @Injectable()
 export class KanbanStore {
   private readonly storage = inject(Storage);
@@ -82,6 +94,10 @@ export class KanbanStore {
 
   getColumnById(columnId: string): Column | undefined {
     return this.columns().find((column) => column.id === columnId);
+  }
+
+  getBoardById(boardId: string): Board | undefined {
+    return this.boards().find((board) => board.id === boardId);
   }
 
   addColumn(columnInput: CreateColumnInput) {
@@ -245,6 +261,55 @@ export class KanbanStore {
       ...current,
       columns: current.columns.filter((column) => column.id !== columnId),
     }));
+  }
+
+  addBoard(boardInput: CreateBoardInput): string {
+    const boardId = generateId();
+
+    this._boards.update((boards) => [
+      ...boards,
+      {
+        id: boardId,
+        name: boardInput.name,
+        startDate: boardInput.startDate,
+        dueDate: boardInput.dueDate,
+        columns: [],
+      },
+    ]);
+
+    return boardId;
+  }
+
+  updateBoard(boardId: string, patch: UpdateBoardInput): void {
+    this._boards.update((boards) =>
+      boards.map((board) => (board.id === boardId ? { ...board, ...patch } : board)),
+    );
+  }
+
+  removeBoard(boardId: string): void {
+    this._boards.update((boards) => boards.filter((board) => board.id !== boardId));
+  }
+
+  moveBoard(fromIndex: number, toIndex: number): void {
+    this._boards.update((boards) => {
+      if (boards.length <= 1) {
+        return boards;
+      }
+
+      const nextBoards = [...boards];
+      const safeFromIndex = Math.max(0, Math.min(fromIndex, nextBoards.length - 1));
+      const safeToIndex = Math.max(0, Math.min(toIndex, nextBoards.length - 1));
+      const movedBoard = nextBoards[safeFromIndex];
+
+      if (!movedBoard || safeFromIndex === safeToIndex) {
+        return boards;
+      }
+
+      nextBoards.splice(safeFromIndex, 1);
+      nextBoards.splice(safeToIndex, 0, movedBoard);
+
+      return nextBoards;
+    });
   }
 
   private patchCurrentBoard(updater: (board: Board) => Board): void {

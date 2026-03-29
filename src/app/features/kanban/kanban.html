@@ -5,21 +5,37 @@
   class="flex h-full min-h-0 flex-col overflow-x-auto px-8 py-9"
 >
   <header class="mb-6 flex w-max min-w-full items-center gap-2">
+    <button
+      class="bg-os-indigo cursor-pointer rounded-lg p-2.5 font-mono text-xs font-medium tracking-[0.3px]"
+      (click)="onViewBoards()"
+    >
+      View boards
+    </button>
+
+    <button
+      class="border-border text-muted hover:bg-surface2 hover:border-muted hover:text-secondary cursor-pointer rounded-lg border border-dashed p-2.5 text-center font-mono text-xs"
+      (click)="onAddBoard()"
+    >
+      Create a new board
+    </button>
+
+    <span class="text-muted">|</span>
+
     <h2 class="text-secondary text-sm font-bold">
-      {{ board().name }}
+      {{ currentBoard().name }}
     </h2>
 
     <span class="text-muted font-mono" aria-hidden="true">·</span>
 
     <span class="text-muted font-mono text-sm tracking-[1.5px]">
-      <time [attr.datetime]="board().startDate | date: 'yyyy-MM-dd'">
-        {{ board().startDate | date }}
+      <time [attr.datetime]="currentBoard().startDate | date: 'yyyy-MM-dd'">
+        {{ currentBoard().startDate | date }}
       </time>
 
       <span aria-hidden="true">→</span>
 
-      <time [attr.datetime]="board().dueDate | date: 'yyyy-MM-dd'">
-        {{ board().dueDate | date }}
+      <time [attr.datetime]="currentBoard().dueDate | date: 'yyyy-MM-dd'">
+        {{ currentBoard().dueDate | date }}
       </time>
     </span>
   </header>
@@ -91,7 +107,7 @@
     }
 
     <button
-      class="border-border text-muted hover:bg-surface/40 z-1 cursor-pointer border border-dashed text-3xl font-extralight"
+      class="border-border text-muted hover:bg-surface/40 z-1 cursor-pointer rounded-xl border border-dashed text-3xl font-extralight"
       title="Add column"
       (click)="onAddColumn()"
     >
@@ -128,4 +144,135 @@
       />
     </os-modal>
   }
+  @case ("addBoard") {
+    <os-modal
+      [title]="editBoardModalId() ? 'Edit board' : 'Create new board'"
+      color="indigo"
+      (closed)="closeModal()"
+    >
+      <os-create-board-form
+        [selectedBoardId]="editBoardModalId()"
+        (created)="onBoardCreated($event)"
+        (closed)="closeModal()"
+      />
+    </os-modal>
+  }
+}
+
+@if (showViewBoardModal()) {
+  <os-modal title="Your boards" color="indigo" (closed)="closeModal()">
+    <div class="px-6 pt-5 pb-6">
+      <div class="mb-4 flex items-center justify-between border-b border-zinc-800/80 pb-3">
+        <p class="text-muted text-[11px] font-semibold tracking-[0.14em] uppercase">
+          Workspace boards
+        </p>
+        <div class="flex items-center gap-2">
+          <span
+            class="bg-os-indigo/18 text-os-indigo rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide"
+          >
+            {{ boards().length }} total
+          </span>
+
+          <button
+            type="button"
+            title="Create board"
+            (click)="onAddBoard()"
+            class="bg-os-indigo/20 text-os-indigo hover:bg-os-indigo/35 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-sm font-semibold leading-none transition-colors"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="max-h-[340px] space-y-2 overflow-y-auto pr-1"
+        cdkDropList
+        cdkDropListLockAxis="y"
+        [cdkDropListData]="boards()"
+        (cdkDropListDropped)="onDropBoard($event)"
+      >
+        @for (board of boards(); track board.id) {
+          <div
+            class="group border-border bg-surface/40 hover:border-os-indigo/60 hover:bg-os-indigo/10 flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-200"
+            [class.border-os-indigo]="board.id === currentBoard().id"
+            [class.bg-os-indigo]="board.id === currentBoard().id"
+            cdkDrag
+            [cdkDragData]="board"
+          >
+            <button
+              type="button"
+              title="Reorder board"
+              cdkDragHandle
+              class="text-muted hover:text-primary cursor-grab rounded-sm p-1 active:cursor-grabbing"
+            >
+              <img
+                ngSrc="/images/icons/burger-menu.svg"
+                alt="Reorder board"
+                width="14"
+                height="14"
+              />
+            </button>
+
+            <a
+              [routerLink]="['/kanban', board.id]"
+              class="flex min-w-0 flex-1 items-center gap-3"
+              [style.pointer-events]="board.id === currentBoard().id ? 'none' : 'auto'"
+              [class.cursor-not-allowed]="board.id === currentBoard().id"
+              [class.opacity-80]="board.id === currentBoard().id"
+              [attr.aria-disabled]="board.id === currentBoard().id ? 'true' : null"
+              [attr.tabindex]="board.id === currentBoard().id ? -1 : null"
+              (click)="closeModal()"
+            >
+              <div class="min-w-0 flex-1">
+                <p
+                  class="text-secondary group-hover:text-primary truncate text-sm font-semibold transition-colors"
+                  [class.text-primary]="board.id === currentBoard().id"
+                >
+                  {{ board.name }}
+                </p>
+                <p class="text-muted mt-1 text-[11px] tracking-wide">Board {{ $index + 1 }}</p>
+              </div>
+
+              @if (board.id === currentBoard().id) {
+                <span class="bg-os-indigo/20 text-os-indigo rounded-full px-2 py-0.5 text-[10px] font-semibold">
+                  Selected
+                </span>
+              }
+            </a>
+
+            <div class="flex items-center gap-1">
+              <button
+                type="button"
+                title="Delete board"
+                (click)="onDeleteBoard(board.id)"
+                [disabled]="boards().length === 1"
+                class="hover:bg-surface3 disabled:text-muted/50 cursor-pointer rounded-md p-0.5 disabled:cursor-not-allowed"
+              >
+                <img
+                  ngSrc="/images/icons/trash-can.svg"
+                  alt="Delete board"
+                  width="15"
+                  height="15"
+                />
+              </button>
+
+              <button
+                type="button"
+                title="Edit board"
+                (click)="onEditBoard(board.id)"
+                class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5"
+              >
+                <img
+                  ngSrc="/images/icons/edit-button.svg"
+                  alt="Edit board"
+                  width="15"
+                  height="15"
+                />
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </os-modal>
 }
