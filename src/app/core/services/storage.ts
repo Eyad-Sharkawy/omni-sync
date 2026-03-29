@@ -14,7 +14,7 @@ export class Storage {
     const initialBoards: Board[] = [
       {
         id: generateId(),
-        name: "Product Ops Board",
+        name: "Initial board",
         columns: [
           {
             id: generateId(),

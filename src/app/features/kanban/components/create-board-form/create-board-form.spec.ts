@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { Shell } from "./shell";
+import { CreateBoardForm } from "./create-board-form";
 
-describe("Shell", () => {
-  let component: Shell;
-  let fixture: ComponentFixture<Shell>;
+describe("CreateBoardForm", () => {
+  let component: CreateBoardForm;
+  let fixture: ComponentFixture<CreateBoardForm>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Shell],
+      imports: [CreateBoardForm],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Shell);
+    fixture = TestBed.createComponent(CreateBoardForm);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

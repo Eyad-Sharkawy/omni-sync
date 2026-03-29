@@ -7,6 +7,12 @@ export const KANBAN_ROUTES: Routes = [
     path: "",
     component: Kanban,
     providers: [KanbanStore],
-    title: "Kanban",
+    title: "Kanban - Omni Sync",
+  },
+  {
+    path: ":boardId",
+    component: Kanban,
+    providers: [KanbanStore],
+    title: "Kanban - Omni Sync",
   },
 ];

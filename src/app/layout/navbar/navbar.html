@@ -1,4 +1,15 @@
-<nav class="bg-bg border-b-border flex border-b-2 px-10 py-5 text-white">
+<nav class="bg-bg border-b-border flex items-center gap-5 border-b-2 px-10 py-5 text-white">
+  @if (isMobile() && !isLandingPage()) {
+    <button
+      type="button"
+      title="Expand side bar"
+      class="cursor-pointer"
+      (click)="onToggleSideBar()"
+    >
+      <img ngSrc="/images/icons/burger-menu.svg" alt="Expand side bar" width="25" height="25" />
+    </button>
+  }
+
   <a routerLink="/" class="flex items-center gap-4" aria-label="Omni Sync Home">
     <img
       ngSrc="/images/icons/omni-sync-32.svg"

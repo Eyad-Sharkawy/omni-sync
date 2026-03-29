@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 @Component({
-  selector: "os-shell",
+  selector: "os-landing-page",
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: "./shell.html",
-  styleUrl: "./shell.css",
+  templateUrl: "./landing-page.html",
+  styleUrl: "./landing-page.css",
 })
-export class Shell {}
+export class landingPage {}

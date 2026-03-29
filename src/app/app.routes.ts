@@ -1,10 +1,10 @@
 import { Routes } from "@angular/router";
-import { Shell } from "./layout/shell/shell";
+import { landingPage } from "./layout/landing-page/landing-page";
 
 export const routes: Routes = [
   {
     path: "",
-    component: Shell,
+    component: landingPage,
     title: "Omni Sync",
   },
   {

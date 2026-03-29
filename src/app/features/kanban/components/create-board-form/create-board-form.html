@@ -1,0 +1,75 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="onSubmit()"
+  autocomplete="off"
+  class="flex flex-col gap-4 px-6 pt-5 pb-6"
+>
+  <div class="flex flex-col gap-1.5">
+    <label for="board-name" class="os-form-label"> Board Name </label>
+    <input
+      formControlName="name"
+      id="board-name"
+      type="text"
+      inputmode="text"
+      enterkeyhint="done"
+      autocomplete="off"
+      placeholder="Enter board name"
+      class="os-form-input"
+      required
+    />
+
+    @if (nameIsInvalid) {
+      <p class="text-danger text-sm">Add a board name</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="board-start-date" class="os-form-label"> Start Date </label>
+    <input
+      formControlName="startDate"
+      type="date"
+      id="board-start-date"
+      class="os-form-input os-date-input"
+      required
+    />
+
+    @if (startDateIsInvalid) {
+      <p class="text-danger text-sm">Select a valid start date</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <label for="board-due-date" class="os-form-label"> Due Date </label>
+    <input
+      formControlName="dueDate"
+      [min]="minDueDate()"
+      type="date"
+      id="board-due-date"
+      class="os-form-input os-date-input"
+      required
+    />
+
+    @if (dueDateIsInvalid) {
+      <p class="text-danger text-sm">Select a valid due date</p>
+    }
+  </div>
+
+  <hr class="text-border" />
+
+  <div class="flex justify-end gap-2 font-mono text-[12px]">
+    <button
+      type="button"
+      (click)="onModalClosed()"
+      class="border-border text-secondary hover:bg-surface2 hover:text-primary cursor-pointer rounded-lg border bg-transparent px-4.5 py-2 focus-within:outline-[var(--color)] focus-visible:outline"
+    >
+      Cancel
+    </button>
+
+    <button
+      type="submit"
+      class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
+    >
+      {{ isEditMode ? "Edit board" : "Create board" }}
+    </button>
+  </div>
+</form>
