@@ -1,4 +1,5 @@
 import { inject, Injectable } from "@angular/core";
+
 import { LOCAL_STORAGE } from "../tokens/local-storage";
 import { Board } from "../models/board";
 import { generateId } from "../../shared/functions/generate-id";
