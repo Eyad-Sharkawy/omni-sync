@@ -88,10 +88,6 @@
   --shadow-btn-glow: 0 4px 24px rgba(108, 99, 255, 0.4);
 }
 
-@utility fade-in {
-  animation: fade-in 0.35s ease both;
-}
-
 @layer components {
   .transition {
     @apply transition-all duration-[.12s] ease-linear;
@@ -241,14 +237,4 @@ body.is-dragging * {
 
 .os-modal-backdrop {
   background: rgba(0, 0, 0, 0.4);
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
 }

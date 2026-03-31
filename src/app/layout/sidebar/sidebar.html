@@ -4,7 +4,7 @@
   [attr.inert]="!isOpen() ? '' : null"
 >
   <span class="px-4 pt-4.5 pb-2 text-[9px] tracking-[2px] whitespace-nowrap uppercase">
-    @if (!collapsed()) {
+    @if (!collapsed() || isMobile()) {
       Views
     }
   </span>
@@ -16,7 +16,7 @@
         class="flex items-center gap-3 overflow-hidden px-4 py-2 whitespace-nowrap"
       >
         <span class="text-base" aria-hidden="true">⬡</span>
-        @if (!collapsed()) {
+        @if (!collapsed() || isMobile()) {
           <span>Board</span>
         }
       </a>

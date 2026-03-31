@@ -115,14 +115,14 @@ export class Kanban {
       }
 
       if (!boardId) {
-        this.router.navigate(["/kanban", boards[0].id], { replaceUrl: true });
+        this.router.navigate(["/kanban", this.currentBoard().id], { replaceUrl: true });
         return;
       }
 
       const exists = boards.some((board) => board.id === boardId);
 
       if (!exists) {
-        this.router.navigate(["/kanban", boards[0].id], { replaceUrl: true });
+        this.router.navigate(["/kanban", this.currentBoard().id], { replaceUrl: true });
         return;
       }
 

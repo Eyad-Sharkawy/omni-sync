@@ -1,7 +1,7 @@
 @reference "../../../../styles.css";
 
 :host {
-  @apply bg-surface2 border-border fade-in rounded-lg p-3.5;
+  @apply bg-surface2 border-border rounded-lg p-3.5;
 }
 
 :host.cdk-drag-preview {
@@ -10,4 +10,16 @@
 
 :host.cdk-drag-placeholder {
   @apply border-border border border-dashed opacity-30;
+}
+
+.dot-grid-handle .dot-grid {
+  @apply grid grid-cols-3 gap-0.5 opacity-45 transition-opacity;
+}
+
+.dot-grid-handle:hover .dot-grid {
+  @apply opacity-70;
+}
+
+.dot-grid-handle .dot-grid__dot {
+  @apply bg-current block h-[2px] w-[2px] rounded-full;
 }
