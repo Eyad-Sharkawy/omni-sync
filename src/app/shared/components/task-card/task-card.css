@@ -1,7 +1,7 @@
 @reference "../../../../styles.css";
 
 :host {
-  @apply bg-surface2 border-border rounded-lg p-3.5;
+  @apply bg-surface2 border-border fade-in rounded-lg p-3.5;
 }
 
 :host.cdk-drag-preview {

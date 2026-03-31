@@ -19,7 +19,7 @@
       type="button"
       title="Delete task"
       (click)="onDelete()"
-      class="hover:bg-surface3 cursor-pointer rounded-md p-0.5"
+      class="hover:bg-surface3 cursor-pointer rounded-md p-0.5 transition"
     >
       <img ngSrc="/images/icons/trash-can.svg" alt="Delete Task" width="15" height="15" />
     </button>
@@ -28,7 +28,7 @@
       type="button"
       title="Edit task"
       (click)="onEdit()"
-      class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5"
+      class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5 transition"
     >
       <img ngSrc="/images/icons/edit-button.svg" alt="Edit task" width="15" height="15" />
     </button>
@@ -42,7 +42,7 @@
 <div class="border-border border-t px-3.5 py-3">
   <button
     (click)="onAddTask()"
-    class="border-border text-muted hover:bg-surface2 hover:border-muted hover:text-secondary w-full cursor-pointer rounded-lg border border-dashed p-2.5 text-center font-mono text-xs"
+    class="border-border text-muted hover:bg-surface2 hover:border-muted hover:text-secondary w-full cursor-pointer rounded-lg border border-dashed p-2.5 text-center font-mono text-xs transition transition-all duration-[.12s] ease-linear"
   >
     + Add a task
   </button>

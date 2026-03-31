@@ -175,14 +175,14 @@
     <button
       type="button"
       (click)="onModalClosed()"
-      class="border-border text-secondary hover:bg-surface2 hover:text-primary cursor-pointer rounded-lg border bg-transparent px-4.5 py-2 focus-within:outline-[var(--color)] focus-visible:outline"
+      class="border-border text-secondary hover:bg-surface2 hover:text-primary cursor-pointer rounded-lg border bg-transparent px-4.5 py-2 transition focus-within:outline-[var(--color)] focus-visible:outline"
     >
       Cancel
     </button>
 
     <button
       type="submit"
-      class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
+      class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium transition focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
     >
       {{ isEditMode() ? "Edit Task" : "Add Task" }}
     </button>

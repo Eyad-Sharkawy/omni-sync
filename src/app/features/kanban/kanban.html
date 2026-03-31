@@ -6,14 +6,14 @@
 >
   <header class="mb-6 flex w-max min-w-full items-center gap-2">
     <button
-      class="bg-os-indigo cursor-pointer rounded-lg p-2.5 font-mono text-xs font-medium tracking-[0.3px]"
+      class="bg-os-indigo cursor-pointer rounded-lg p-2.5 font-mono text-xs font-medium tracking-[0.3px] transition hover:opacity-85"
       (click)="onViewBoards()"
     >
       View boards
     </button>
 
     <button
-      class="border-border text-muted hover:bg-surface2 hover:border-muted hover:text-secondary cursor-pointer rounded-lg border border-dashed p-2.5 text-center font-mono text-xs"
+      class="border-border text-muted hover:bg-surface2 hover:border-muted hover:text-secondary cursor-pointer rounded-lg border border-dashed p-2.5 text-center font-mono text-xs transition"
       (click)="onAddBoard()"
     >
       Create a new board
@@ -107,7 +107,7 @@
     }
 
     <button
-      class="border-border text-muted hover:bg-surface/40 z-1 cursor-pointer rounded-xl border border-dashed text-3xl font-extralight"
+      class="border-border text-muted hover:bg-surface/40 z-1 cursor-pointer rounded-xl border border-dashed text-3xl font-extralight transition"
       title="Add column"
       (click)="onAddColumn()"
     >
@@ -177,7 +177,7 @@
             type="button"
             title="Create board"
             (click)="onAddBoard()"
-            class="bg-os-indigo/20 text-os-indigo hover:bg-os-indigo/35 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-sm font-semibold leading-none transition-colors"
+            class="bg-os-indigo/20 text-os-indigo hover:bg-os-indigo/35 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-sm leading-none font-semibold transition transition-colors"
           >
             +
           </button>
@@ -203,7 +203,7 @@
               type="button"
               title="Reorder board"
               cdkDragHandle
-              class="text-muted hover:text-primary cursor-grab rounded-sm p-1 active:cursor-grabbing"
+              class="text-muted hover:text-primary cursor-grab rounded-sm p-1 transition active:cursor-grabbing"
             >
               <img
                 ngSrc="/images/icons/burger-menu.svg"
@@ -234,7 +234,9 @@
               </div>
 
               @if (board.id === currentBoard().id) {
-                <span class="bg-os-indigo/20 text-os-indigo rounded-full px-2 py-0.5 text-[10px] font-semibold">
+                <span
+                  class="bg-os-indigo/20 text-os-indigo rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                >
                   Selected
                 </span>
               }
@@ -246,7 +248,7 @@
                 title="Delete board"
                 (click)="onDeleteBoard(board.id)"
                 [disabled]="boards().length === 1"
-                class="hover:bg-surface3 disabled:text-muted/50 cursor-pointer rounded-md p-0.5 disabled:cursor-not-allowed"
+                class="hover:bg-surface3 disabled:text-muted/50 cursor-pointer rounded-md p-0.5 transition disabled:cursor-not-allowed"
               >
                 <img
                   ngSrc="/images/icons/trash-can.svg"
@@ -260,7 +262,7 @@
                 type="button"
                 title="Edit board"
                 (click)="onEditBoard(board.id)"
-                class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5"
+                class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5 transition"
               >
                 <img
                   ngSrc="/images/icons/edit-button.svg"

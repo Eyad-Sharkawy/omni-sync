@@ -1,7 +1,7 @@
 <ng-template #modalTemplate>
   <div
     #dialogRoot
-    class="border-border text-primary bg-surface relative w-full max-w-130 overflow-x-hidden rounded-2xl border before:absolute before:top-0 before:left-0 before:h-0.5 before:w-full before:bg-[var(--color)] focus:outline-none"
+    class="border-border text-primary bg-surface relative w-full max-w-130 overflow-x-hidden rounded-2xl border transition-colors duration-[.2s] ease-linear before:absolute before:top-0 before:left-0 before:h-0.5 before:w-full before:bg-[var(--color)] before:transition-colors before:duration-[.2s] before:ease-linear focus:outline-none"
     [style.--color]="'var(--color-os-' + color() + ')'"
     cdkTrapFocus
     [cdkTrapFocusAutoCapture]="false"
@@ -13,9 +13,9 @@
       <div>
         @if (badge()) {
           <div
-            class="bg-surface2 border-border flex items-center gap-2 rounded-2xl border px-3 py-1"
+            class="bg-surface2 border-border flex items-center gap-2 rounded-2xl border px-3 py-1 transition-colors duration-[.2s] ease-linear"
           >
-            <span class="shadow-[var(--color]) h-1.5 w-1.5 rounded-full bg-[var(--color)]"></span>
+            <span class="shadow-[var(--color]) h-1.5 w-1.5 rounded-full bg-[var(--color)] transition-all duration-[.2s] ease-linear"></span>
             <span class="text-secondary text-sm tracking-[0.5px]">{{ badge() }}</span>
           </div>
         }
@@ -25,7 +25,7 @@
 
       <button
         type="button"
-        class="bg-surface2 border-border text-secondary hover:bg-surface3 hover:text-primary -mt-3.5 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-lg border text-base focus-within:outline-[var(--color)] focus-visible:outline"
+        class="bg-surface2 border-border text-secondary hover:bg-surface3 hover:text-primary -mt-3.5 flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-lg border text-base transition focus-within:outline-[var(--color)] focus-visible:outline"
         (click)="requestClose()"
       >
         ✕
