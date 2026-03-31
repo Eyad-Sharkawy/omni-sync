@@ -38,4 +38,8 @@ export class App {
   onToggleSideBar() {
     this.sideBarIsToggled.update((prev) => !prev);
   }
+
+  onCloseSideBar() {
+    this.sideBarIsToggled.set(false);
+  }
 }

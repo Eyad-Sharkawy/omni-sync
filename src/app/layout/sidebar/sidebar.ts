@@ -15,8 +15,8 @@ import { map } from "rxjs";
 @Component({
   selector: "os-sidebar",
   imports: [RouterLink, RouterLinkActive],
-  templateUrl: "./sidebar.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: "./sidebar.html",
   styleUrl: "./sidebar.css",
   host: {
     "[style.--width]": "width()",
@@ -26,7 +26,7 @@ export class Sidebar {
   private readonly breakPointObserver = inject(BreakpointObserver);
 
   readonly isOpen = input(true);
-  readonly width = signal<"0rem" | "13.75rem" | "3.75rem" | "100vw">("0rem");
+  readonly width = signal<"0rem" | "13.75rem" | "3.75rem" | "75vw">("0rem");
   readonly collapsed = signal(false);
   private readonly hasMounted = signal(false);
   readonly isMobile = toSignal(
@@ -50,7 +50,7 @@ export class Sidebar {
         return;
       }
 
-      this.width.set(this.isMobile() ? "100vw" : this.collapsed() ? "3.75rem" : "13.75rem");
+      this.width.set(this.isMobile() ? "75vw" : this.collapsed() ? "3.75rem" : "13.75rem");
     });
   }
 

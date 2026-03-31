@@ -11,3 +11,9 @@
     @apply bg-os-indigo absolute top-1/2 left-0 h-5 w-1 -translate-y-1/2 transform rounded-r-sm content-[""];
   }
 }
+
+@media (max-width: 599px) {
+  :host {
+    @apply absolute top-0 bottom-0 left-0 z-30;
+  }
+}
