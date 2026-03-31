@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, contentChildren, input, output } from "@angular/core";
 import { TaskTag } from "../task-tag/task-tag";
 import { NgOptimizedImage } from "@angular/common";
+import { CdkDragHandle } from "@angular/cdk/drag-drop";
 
 type Priority = "low" | "medium" | "high";
 
 @Component({
   selector: "os-task-card",
-  imports: [NgOptimizedImage],
+  imports: [NgOptimizedImage, CdkDragHandle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./task-card.html",
   styleUrl: "./task-card.css",

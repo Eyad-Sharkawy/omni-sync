@@ -8,3 +8,15 @@
   @apply pointer-events-none absolute inset-0 z-0 content-[""];
   background-image: url("data:image/svg+xml;charset=utf-8;base64,PHN2ZyB2aWV3Qm94PScwIDAgMjU2IDI1NicgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSc0JyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsdGVyPSd1cmwoI24pJyBvcGFjaXR5PScwLjAzNScvPjwvc3ZnPg==");
 }
+
+.dot-grid-handle .dot-grid {
+  @apply grid grid-cols-3 gap-0.5 opacity-45 transition-opacity;
+}
+
+.dot-grid-handle:hover .dot-grid {
+  @apply opacity-70;
+}
+
+.dot-grid-handle .dot-grid__dot {
+  @apply bg-current block h-[2px] w-[2px] rounded-full;
+}

@@ -6,6 +6,7 @@ import { Column } from "../../../core/models/column";
 import { Task } from "../../../core/models/task";
 import { generateId } from "../../../shared/functions/generate-id";
 import { OmniSyncColors } from "../../../shared/UI/colors";
+import { LOCAL_STORAGE } from "../../../core/tokens/local-storage";
 
 export interface CreateTaskInput {
   title: string;
@@ -40,11 +41,13 @@ export interface UpdateBoardInput {
 @Injectable()
 export class KanbanStore {
   private readonly storage = inject(Storage);
+  private readonly localStorage = inject(LOCAL_STORAGE);
+  private readonly CURRENT_BOARD_KEY = "omni-sync.currentBoardId";
 
   private readonly _boards = signal<Board[]>(this.storage.getBoards());
   readonly boards = this._boards.asReadonly();
 
-  private readonly _currentBoardId = signal<string | null>(null);
+  private readonly _currentBoardId = signal<string | null>(this.getStoredCurrentBoardId());
 
   currentBoard = computed(() => {
     const boards = this.boards();
@@ -86,10 +89,50 @@ export class KanbanStore {
 
       this.storage.setBoards(boards);
     });
+
+    // Persist and validate board selection so we can restore it after reloads.
+    effect(() => {
+      const selectedId = this._currentBoardId();
+      const boards = this._boards();
+
+      if (!this.canUseLocalStorage()) {
+        return;
+      }
+
+      if (selectedId && !boards.some((board) => board.id === selectedId)) {
+        this._currentBoardId.set(null);
+        return;
+      }
+
+      if (!selectedId) {
+        this.localStorage.removeItem(this.CURRENT_BOARD_KEY);
+        return;
+      }
+
+      this.localStorage.setItem(this.CURRENT_BOARD_KEY, selectedId);
+    });
   }
 
   setCurrentBoard(boardId: string): void {
     this._currentBoardId.set(boardId);
+  }
+
+  private getStoredCurrentBoardId(): string | null {
+    if (!this.canUseLocalStorage()) {
+      return null;
+    }
+
+    const currentBoardId = this.localStorage.getItem(this.CURRENT_BOARD_KEY);
+
+    return currentBoardId && currentBoardId.trim().length > 0 ? currentBoardId : null;
+  }
+
+  private canUseLocalStorage(): boolean {
+    return (
+      typeof this.localStorage?.getItem === "function" &&
+      typeof this.localStorage?.setItem === "function" &&
+      typeof this.localStorage?.removeItem === "function"
+    );
   }
 
   getColumnById(columnId: string): Column | undefined {
