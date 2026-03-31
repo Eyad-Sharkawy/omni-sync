@@ -88,7 +88,15 @@
   --shadow-btn-glow: 0 4px 24px rgba(108, 99, 255, 0.4);
 }
 
+@utility fade-in {
+  animation: fade-in 0.35s ease both;
+}
+
 @layer components {
+  .transition {
+    @apply transition-all duration-[.12s] ease-linear;
+  }
+
   .os-form-label {
     @apply text-muted font-mono text-[10px] tracking-[1.5px] uppercase;
   }
@@ -149,7 +157,7 @@
   }
 
   .os-radio-label {
-    @apply bg-surface2 border-border text-secondary flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2 font-mono text-[11px];
+    @apply bg-surface2 border-border text-secondary flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border px-2.5 py-2 font-mono text-[11px] transition;
   }
 
   .os-radio-dot {
@@ -184,7 +192,7 @@
   }
 
   .os-color-option {
-    @apply border-border bg-surface2 hover:bg-surface3 relative flex cursor-pointer items-center justify-center rounded-lg border py-2;
+    @apply border-border bg-surface2 hover:bg-surface3 relative flex cursor-pointer items-center justify-center rounded-lg border py-2 transition;
   }
 
   .os-color-input {
@@ -233,4 +241,14 @@ body.is-dragging * {
 
 .os-modal-backdrop {
   background: rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
