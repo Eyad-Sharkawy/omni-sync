@@ -1,9 +1,8 @@
-import { Column } from "./column";
-
 export interface Board {
   id: string;
+  publicId: string;
   name: string;
-  columns: Column[];
+  columnsIds: string[];
   startDate: Date;
   dueDate: Date;
 }

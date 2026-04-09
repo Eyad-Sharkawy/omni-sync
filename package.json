@@ -23,6 +23,7 @@
     "@angular/router": "^21.2.5",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "nanoid": "^5.1.7",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

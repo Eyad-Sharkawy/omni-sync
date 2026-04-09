@@ -2,7 +2,9 @@ import { inject, Injectable } from "@angular/core";
 
 import { LOCAL_STORAGE } from "../tokens/local-storage";
 import { Board } from "../models/board";
-import { generateId } from "../../shared/functions/generate-id";
+import { nanoid } from "nanoid";
+import { Column } from "../models/column";
+import { Task } from "../models/task";
 
 @Injectable({
   providedIn: "root",
@@ -11,72 +13,102 @@ export class Storage {
   private readonly localStorage = inject(LOCAL_STORAGE);
   private readonly BOARDS_KEY = "omni-sync.boards";
 
-  private createInitialBoards(options: { persist: boolean } = { persist: true }): Board[] {
+  private createInitialBoards(options: { persist: boolean } = { persist: true }): {
+    boards: Board[];
+    columns: Column[];
+    tasks: Task[];
+  } {
     const initialBoards: Board[] = [
       {
-        id: generateId(),
+        id: nanoid(),
+        publicId: nanoid(12),
         name: "Initial board",
-        columns: [
-          {
-            id: generateId(),
-            header: "To do",
-            color: "indigo",
-            tasks: [],
-          },
-          {
-            id: generateId(),
-            header: "In progress",
-            color: "amber",
-            tasks: [],
-          },
-          {
-            id: "in-review",
-            header: "In Review",
-            color: "sky",
-            tasks: [],
-          },
-          {
-            id: generateId(),
-            header: "Done",
-            color: "mint",
-            tasks: [],
-          },
-        ],
+        columnsIds: [],
         startDate: new Date("2025-02-05"),
         dueDate: new Date("2026-04-01"),
       },
     ];
 
+    const initialBoardColumns: Column[] = [
+      {
+        id: nanoid(),
+        header: "To do",
+        color: "indigo",
+        boardId: initialBoards[0].id,
+        tasksIds: [],
+      },
+      {
+        id: nanoid(),
+        header: "In progress",
+        color: "amber",
+        boardId: initialBoards[0].id,
+        tasksIds: [],
+      },
+      {
+        id: "in-review",
+        header: "In Review",
+        color: "sky",
+        boardId: initialBoards[0].id,
+        tasksIds: [],
+      },
+      {
+        id: nanoid(),
+        header: "Done",
+        color: "mint",
+        boardId: initialBoards[0].id,
+        tasksIds: [],
+      },
+    ];
+
+    initialBoards[0].columnsIds = initialBoardColumns
+      .filter((column) => column.boardId === initialBoards[0].id)
+      .map((column) => column.id);
+
     if (options.persist) {
-      this.setBoards(initialBoards);
+      this.setKanban(initialBoards, initialBoardColumns, []);
     }
 
-    return initialBoards;
+    return { boards: initialBoards, columns: initialBoardColumns, tasks: [] };
   }
 
-  getBoards(): Board[] {
+  getKanban(): { boards: Board[]; columns: Column[]; tasks: Task[] } {
     const raw = this.localStorage.getItem(this.BOARDS_KEY);
 
     if (!raw) {
-      return this.createInitialBoards();
+      const initialBoard = this.createInitialBoards();
+      return {
+        boards: initialBoard.boards,
+        columns: initialBoard.columns,
+        tasks: initialBoard.tasks,
+      };
     }
 
     try {
-      const parsed = JSON.parse(raw) as Board[];
+      const {
+        boards: parsedBoards,
+        columns: parsedColumns,
+        tasks: parsedTasks,
+      } = JSON.parse(raw) as {
+        boards: Board[];
+        columns: Column[];
+        tasks: Task[];
+      };
 
-      return parsed.map((board) => ({
+      const boards: Board[] = parsedBoards.map((board) => ({
         ...board,
         startDate: new Date(board.startDate),
         dueDate: new Date(board.dueDate),
-        columns: board.columns.map((column) => ({
-          ...column,
-          tasks: column.tasks.map((task) => ({
-            ...task,
-            startDate: new Date(task.startDate),
-            dueDate: new Date(task.dueDate),
-          })),
-        })),
       }));
+
+      const columns: Column[] = parsedColumns;
+
+      const tasks: Task[] = parsedTasks.map((task) => ({
+        ...task,
+        startDate: new Date(task.startDate),
+        dueDate: new Date(task.dueDate),
+      }));
+
+      return { boards, columns, tasks };
     } catch (error) {
       console.warn(
         `[Storage] Failed to parse boards from localStorage key "${this.BOARDS_KEY}". Returning in-memory initial boards without overwriting stored value. ${error}`,
@@ -86,8 +118,11 @@ export class Storage {
     }
   }
 
-  setBoards(boards: Board[]) {
-    this.localStorage.setItem(this.BOARDS_KEY, JSON.stringify(boards));
+  setKanban(boards: Board[], columns: Column[], tasks: Task[]) {
+    this.localStorage.setItem(
+      this.BOARDS_KEY,
+      JSON.stringify({ boards: boards, columns: columns, tasks: tasks }),
+    );
   }
 
   clearBoards(): void {
