@@ -9,6 +9,9 @@ import {
   viewChild,
 } from "@angular/core";
 import { DatePipe, NgOptimizedImage } from "@angular/common";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { map } from "rxjs";
 
 import {
   CdkDrag,
@@ -32,9 +35,6 @@ import { AddTaskForm } from "./components/add-task-form/add-task-form";
 import { OmniSyncColors } from "../../shared/UI/colors";
 import { AddColumnForm } from "./components/add-column-form/add-column-form";
 import { CreateBoardForm } from "./components/create-board-form/create-board-form";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { map } from "rxjs";
 
 interface ModalTaskInfo {
   columnId: string;
@@ -69,7 +69,7 @@ export class Kanban {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  private readonly routeBoardId = toSignal(
+  private readonly routeBoardPublicId = toSignal(
     this.route.paramMap.pipe(map((prams) => prams.get("boardId"))),
     { initialValue: null },
   );
@@ -89,7 +89,7 @@ export class Kanban {
 
   readonly boards = this.kanbanStore.boards;
   readonly currentBoard = this.kanbanStore.currentBoard;
-  columns = this.kanbanStore.columns;
+  columns = this.kanbanStore.currentColumns;
   addTaskModalInfo = signal<ModalTaskInfo | null>(null);
   addColumnModalInfo = signal<ModalTaskInfo | null>(null);
   editBoardModalId = signal<string | null>(null);
@@ -105,28 +105,30 @@ export class Kanban {
   modalBadge = computed(() => this.modalColumn()?.header ?? "");
   modalColor = signal<OmniSyncColors>("indigo");
 
+  tasksByColumnId = (columnId: string): Task[] => this.kanbanStore.getTasksByColumnId(columnId);
+
   constructor() {
     effect(() => {
       const boards = this.boards();
-      const boardId = this.routeBoardId();
+      const boardPublicId = this.routeBoardPublicId();
 
       if (boards.length === 0) {
         return;
       }
 
-      if (!boardId) {
-        this.router.navigate(["/kanban", this.currentBoard().id], { replaceUrl: true });
+      if (!boardPublicId) {
+        void this.router.navigate(["/kanban", this.currentBoard().publicId], { replaceUrl: true });
         return;
       }
 
-      const exists = boards.some((board) => board.id === boardId);
+      const matchedBoard = this.kanbanStore.getBoardByPublicId(boardPublicId);
 
-      if (!exists) {
-        this.router.navigate(["/kanban", this.currentBoard().id], { replaceUrl: true });
+      if (!matchedBoard) {
+        void this.router.navigate(["/kanban", this.currentBoard().publicId], { replaceUrl: true });
         return;
       }
 
-      this.kanbanStore.setCurrentBoard(boardId);
+      this.kanbanStore.setCurrentBoard(matchedBoard.id);
     });
 
     effect(() => {
@@ -160,7 +162,13 @@ export class Kanban {
 
   onBoardCreated(boardId: string): void {
     this.closeModal();
-    this.router.navigate(["/kanban", boardId]);
+    const board = this.kanbanStore.getBoardById(boardId);
+
+    if (!board) {
+      return;
+    }
+
+    void this.router.navigate(["/kanban", board.publicId]);
   }
 
   onEditBoard(boardId: string): void {
@@ -201,8 +209,8 @@ export class Kanban {
     this.addTaskModalInfo.update((value) => (value ? { ...value, columnId } : value));
   }
 
-  onDeleteTask(columnId: string, taskId: string) {
-    this.kanbanStore.removeTask(columnId, taskId);
+  onDeleteTask(taskId: string) {
+    this.kanbanStore.removeTask(taskId);
   }
 
   onDeleteColumn(columnId: string) {
@@ -318,7 +326,10 @@ export class Kanban {
         return;
       }
 
-      if (taskInfo.taskId && !column.tasks.some((task) => task.id === taskInfo.taskId)) {
+      if (
+        taskInfo.taskId &&
+        !this.kanbanStore.hasTaskInColumn(taskInfo.columnId, taskInfo.taskId)
+      ) {
         return;
       }
 

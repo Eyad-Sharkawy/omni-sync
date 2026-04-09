@@ -4,9 +4,11 @@ import { Board } from "../../../core/models/board";
 import { Storage } from "../../../core/services/storage";
 import { Column } from "../../../core/models/column";
 import { Task } from "../../../core/models/task";
-import { generateId } from "../../../shared/functions/generate-id";
 import { OmniSyncColors } from "../../../shared/UI/colors";
 import { LOCAL_STORAGE } from "../../../core/tokens/local-storage";
+import { nanoid } from "nanoid";
+
+type KanbanState = ReturnType<Storage["getKanban"]>;
 
 export interface CreateTaskInput {
   title: string;
@@ -44,10 +46,13 @@ export class KanbanStore {
   private readonly localStorage = inject(LOCAL_STORAGE);
   private readonly CURRENT_BOARD_KEY = "omni-sync.currentBoardId";
 
-  private readonly _boards = signal<Board[]>(this.storage.getBoards());
-  readonly boards = this._boards.asReadonly();
+  private readonly _kanban = signal<KanbanState>(this.storage.getKanban());
 
-  private readonly _currentBoardId = signal<string | null>(this.getStoredCurrentBoardId());
+  readonly boards = computed(() => this._kanban().boards);
+  readonly columns = computed(() => this._kanban().columns);
+  readonly tasks = computed(() => this._kanban().tasks);
+
+  private readonly _currentBoardId = signal<string>(this.getStoredCurrentBoardId());
 
   currentBoard = computed(() => {
     const boards = this.boards();
@@ -64,22 +69,28 @@ export class KanbanStore {
     return boards[0];
   });
 
-  readonly columns = computed(() => this.currentBoard().columns ?? []);
+  readonly currentColumns = computed(() => {
+    const board = this.currentBoard();
+
+    if (!board) return [];
+    const byId = new Map(this.columns().map((c) => [c.id, c]));
+    return board.columnsIds.map((id) => byId.get(id)).filter((c): c is Column => !!c);
+  });
 
   constructor() {
     //Persist to LocalStorage only when board state actually changes.
     let isFirstRun = true;
-    let lastSerialized = JSON.stringify(this._boards());
+    let lastSerialized = JSON.stringify(this._kanban());
 
     effect(() => {
-      const boards = this._boards();
+      const kanban = this._kanban();
 
       if (isFirstRun) {
         isFirstRun = false;
         return;
       }
 
-      const nextSerialized = JSON.stringify(boards);
+      const nextSerialized = JSON.stringify(kanban);
 
       if (nextSerialized === lastSerialized) {
         return;
@@ -87,20 +98,20 @@ export class KanbanStore {
 
       lastSerialized = nextSerialized;
 
-      this.storage.setBoards(boards);
+      this.storage.setKanban(kanban.boards, kanban.columns, kanban.tasks);
     });
 
     // Persist and validate board selection so we can restore it after reloads.
     effect(() => {
       const selectedId = this._currentBoardId();
-      const boards = this._boards();
+      const boards = this.boards();
 
       if (!this.canUseLocalStorage()) {
         return;
       }
 
       if (selectedId && !boards.some((board) => board.id === selectedId)) {
-        this._currentBoardId.set(null);
+        this._currentBoardId.set(this.boards()[0].id);
         return;
       }
 
@@ -117,14 +128,16 @@ export class KanbanStore {
     this._currentBoardId.set(boardId);
   }
 
-  private getStoredCurrentBoardId(): string | null {
+  private getStoredCurrentBoardId(): string {
     if (!this.canUseLocalStorage()) {
-      return null;
+      return this.boards()[0].id;
     }
 
     const currentBoardId = this.localStorage.getItem(this.CURRENT_BOARD_KEY);
 
-    return currentBoardId && currentBoardId.trim().length > 0 ? currentBoardId : null;
+    return currentBoardId && currentBoardId.trim().length > 0
+      ? currentBoardId
+      : this.boards()[0].id;
   }
 
   private canUseLocalStorage(): boolean {
@@ -143,83 +156,94 @@ export class KanbanStore {
     return this.boards().find((board) => board.id === boardId);
   }
 
-  addColumn(columnInput: CreateColumnInput) {
-    const board = this.currentBoard();
+  getBoardByPublicId(boardPublicId: string): Board | undefined {
+    return this.boards().find((board) => board.publicId === boardPublicId);
+  }
 
-    if (!board) {
-      return;
+  addColumnToBoard(columnInput: CreateColumnInput): string {
+    const currentBoard = this.currentBoard();
+
+    if (!currentBoard) {
+      return "";
     }
 
+    const columnId = nanoid();
+
     const column: Column = {
-      id: generateId(),
+      id: columnId,
       header: columnInput.header,
       color: columnInput.color,
-      tasks: [],
+      boardId: currentBoard.id,
+      tasksIds: [],
     };
 
-    this.patchCurrentBoard((current) => ({
-      ...current,
-      columns: [...current.columns, column],
+    this.updateKanban((state) => ({
+      ...state,
+      boards: state.boards.map((board) =>
+        board.id === currentBoard.id
+          ? {
+              ...board,
+              columnsIds: [...board.columnsIds, columnId],
+            }
+          : board,
+      ),
+      columns: [...state.columns, column],
     }));
+
+    return columnId;
   }
 
   updateColumn(columnId: string, patch: UpdateColumnInput): void {
-    this.patchCurrentBoard((current) => ({
-      ...current,
-      columns: current.columns.map((column) =>
-        column.id === columnId ? { ...column, ...patch } : column,
-      ),
-    }));
+    this.patchColumnById(columnId, patch);
   }
 
-  addTask(columnId: string, taskInput: CreateTaskInput): void {
+  addTaskToColumn(columnId: string, taskInput: CreateTaskInput): string {
     const board = this.currentBoard();
 
     if (!board) {
-      return;
+      return "";
     }
 
+    const taskId = nanoid();
+
     const task: Task = {
-      id: generateId(),
+      id: taskId,
       title: taskInput.title,
       priority: taskInput.priority,
+      columnId: columnId,
       tags: taskInput.tags ?? [],
       startDate: taskInput.startDate,
       dueDate: taskInput.dueDate,
     };
 
-    this.patchCurrentBoard((current) => ({
-      ...current,
-      columns: current.columns.map((column) =>
-        column.id === columnId ? { ...column, tasks: [...column.tasks, task] } : column,
-      ),
-    }));
-  }
-
-  updateTask(columnId: string, taskId: string, patch: Partial<Omit<Task, "id">>): void {
-    this.patchCurrentBoard((current) => ({
-      ...current,
-      columns: current.columns.map((column) => {
-        if (column.id !== columnId) {
-          return column;
-        }
-
-        return {
-          ...column,
-          tasks: column.tasks.map((task) => (task.id === taskId ? { ...task, ...patch } : task)),
-        };
-      }),
-    }));
-  }
-
-  removeTask(columnId: string, taskId: string): void {
-    this.patchCurrentBoard((current) => ({
-      ...current,
-      columns: current.columns.map((column) =>
+    this.updateKanban((state) => ({
+      ...state,
+      columns: state.columns.map((column) =>
         column.id === columnId
-          ? { ...column, tasks: column.tasks.filter((task) => task.id !== taskId) }
+          ? {
+              ...column,
+              tasksIds: [...column.tasksIds, taskId],
+            }
           : column,
       ),
+      tasks: [...state.tasks, task],
+    }));
+
+    return taskId;
+  }
+
+  updateTask(taskId: string, patch: Partial<Omit<Task, "id">>): void {
+    this.patchTaskById(taskId, patch);
+  }
+
+  removeTask(taskId: string): void {
+    this.updateKanban((state) => ({
+      ...state,
+      tasks: state.tasks.filter((task) => task.id !== taskId),
+      columns: state.columns.map((column) => ({
+        ...column,
+        tasksIds: column.tasksIds.filter((id) => id !== taskId),
+      })),
     }));
   }
 
@@ -230,51 +254,50 @@ export class KanbanStore {
     fromIndex: number,
     toIndex: number,
   ): void {
-    this.patchCurrentBoard((current) => {
-      const sourceColumn = current.columns.find((column) => column.id === fromColumnId);
-      const targetColumn = current.columns.find((column) => column.id === toColumnId);
+    this.updateKanban((state) => {
+      const sourceColumn = state.columns.find((column) => column.id === fromColumnId);
+      const targetColumn = state.columns.find((column) => column.id === toColumnId);
 
       if (!sourceColumn || !targetColumn) {
-        return current;
+        return state;
       }
 
-      const sourceTasks = [...sourceColumn.tasks];
-      const safeFromIndex = Math.max(0, Math.min(fromIndex, sourceTasks.length - 1));
-      const movedTask = sourceTasks[safeFromIndex];
+      const sourceIds = [...sourceColumn.tasksIds];
 
-      if (!movedTask || movedTask.id !== taskId) {
-        return current;
+      const safeFromIndex = Math.max(0, Math.min(fromIndex, sourceIds.length - 1));
+      const movedTaskId = sourceIds[safeFromIndex];
+
+      if (!movedTaskId || movedTaskId !== taskId) {
+        return state;
       }
 
-      sourceTasks.splice(safeFromIndex, 1);
-
+      sourceIds.splice(safeFromIndex, 1);
       if (fromColumnId === toColumnId) {
-        const safeToIndex = Math.max(0, Math.min(toIndex, sourceTasks.length));
-        sourceTasks.splice(safeToIndex, 0, movedTask);
-
+        const safeToIndex = Math.max(0, Math.min(toIndex, sourceIds.length));
+        sourceIds.splice(safeToIndex, 0, taskId);
         return {
-          ...current,
-          columns: current.columns.map((column) =>
-            column.id === fromColumnId ? { ...column, tasks: sourceTasks } : column,
+          ...state,
+          columns: state.columns.map((column) =>
+            column.id === fromColumnId ? { ...column, tasksIds: sourceIds } : column,
           ),
         };
       }
 
-      const targetTasks = [...targetColumn.tasks];
-      const safeToIndex = Math.max(0, Math.min(toIndex, targetTasks.length));
-      targetTasks.splice(safeToIndex, 0, movedTask);
-
+      const targetIds = [...targetColumn.tasksIds];
+      const safeToIndex = Math.max(0, Math.min(toIndex, targetIds.length));
+      targetIds.splice(safeToIndex, 0, taskId);
       return {
-        ...current,
-        columns: current.columns.map((column) => {
+        ...state,
+        tasks: state.tasks.map((task) =>
+          task.id === taskId ? { ...task, columnId: toColumnId } : task,
+        ),
+        columns: state.columns.map((column) => {
           if (column.id === fromColumnId) {
-            return { ...column, tasks: sourceTasks };
+            return { ...column, tasksIds: sourceIds };
           }
-
           if (column.id === toColumnId) {
-            return { ...column, tasks: targetTasks };
+            return { ...column, tasksIds: targetIds };
           }
-
           return column;
         }),
       };
@@ -282,61 +305,93 @@ export class KanbanStore {
   }
 
   moveColumn(fromIndex: number, toIndex: number): void {
-    this.patchCurrentBoard((current) => {
-      const columns = [...current.columns];
-      const safeFromIndex = Math.max(0, Math.min(fromIndex, columns.length - 1));
-      const movedColumn = columns[safeFromIndex];
-      const safeToIndex = Math.max(0, Math.min(toIndex, columns.length - 1));
+    const currentBoardId = this._currentBoardId();
 
-      if (!movedColumn) {
-        return current;
+    this.updateKanban((state) => {
+      const board = state.boards.find((b) => b.id === currentBoardId);
+
+      if (!board) {
+        return state;
       }
 
-      columns.splice(safeFromIndex, 1);
-      columns.splice(safeToIndex, 0, movedColumn);
+      const nextIds = [...board.columnsIds];
+      const safeFromIndex = Math.max(0, Math.min(fromIndex, nextIds.length - 1));
+      const safeToIndex = Math.max(0, Math.min(toIndex, nextIds.length - 1));
 
-      return { ...current, columns };
+      if (safeFromIndex === safeToIndex || !nextIds[safeFromIndex]) {
+        return state;
+      }
+
+      const [movedId] = nextIds.splice(safeFromIndex, 1);
+      nextIds.splice(safeToIndex, 0, movedId);
+
+      return {
+        ...state,
+        boards: state.boards.map((b) =>
+          b.id === currentBoardId ? { ...b, columnsIds: nextIds } : b,
+        ),
+      };
     });
   }
 
   removeColumn(columnId: string): void {
-    this.patchCurrentBoard((current) => ({
-      ...current,
-      columns: current.columns.filter((column) => column.id !== columnId),
+    this.updateKanban((state) => ({
+      ...state,
+      boards: state.boards.map((board) => ({
+        ...board,
+        columnsIds: board.columnsIds.filter((id) => id !== columnId),
+      })),
+      columns: state.columns.filter((column) => column.id !== columnId),
+      tasks: state.tasks.filter((task) => task.columnId !== columnId),
     }));
   }
 
   addBoard(boardInput: CreateBoardInput): string {
-    const boardId = generateId();
+    const boardId = nanoid();
+    const publicId = nanoid(12);
 
-    this._boards.update((boards) => [
-      ...boards,
-      {
-        id: boardId,
-        name: boardInput.name,
-        startDate: boardInput.startDate,
-        dueDate: boardInput.dueDate,
-        columns: [],
-      },
-    ]);
+    const board = {
+      id: boardId,
+      publicId: publicId,
+      name: boardInput.name,
+      startDate: boardInput.startDate,
+      dueDate: boardInput.dueDate,
+      columnsIds: [],
+    };
+
+    this.updateKanban((state) => ({
+      ...state,
+      boards: [...state.boards, board],
+    }));
 
     return boardId;
   }
 
   updateBoard(boardId: string, patch: UpdateBoardInput): void {
-    this._boards.update((boards) =>
-      boards.map((board) => (board.id === boardId ? { ...board, ...patch } : board)),
-    );
+    this.patchBoardById(boardId, patch);
   }
 
   removeBoard(boardId: string): void {
-    this._boards.update((boards) => boards.filter((board) => board.id !== boardId));
+    this.updateKanban((state) => {
+      const removedColumnIds = new Set(
+        state.columns.filter((column) => column.boardId === boardId).map((column) => column.id),
+      );
+
+      return {
+        ...state,
+        boards: state.boards.filter((board) => board.id !== boardId),
+        columns: state.columns.filter((column) => column.boardId !== boardId),
+        tasks: state.tasks.filter((task) => !removedColumnIds.has(task.columnId)),
+      };
+    });
   }
 
   moveBoard(fromIndex: number, toIndex: number): void {
-    this._boards.update((boards) => {
+    this.updateKanban((state) => {
+      const boards = state.boards;
+
       if (boards.length <= 1) {
-        return boards;
+        return state;
       }
 
       const nextBoards = [...boards];
@@ -345,25 +400,58 @@ export class KanbanStore {
       const movedBoard = nextBoards[safeFromIndex];
 
       if (!movedBoard || safeFromIndex === safeToIndex) {
-        return boards;
+        return state;
       }
 
       nextBoards.splice(safeFromIndex, 1);
       nextBoards.splice(safeToIndex, 0, movedBoard);
 
-      return nextBoards;
+      return {
+        ...state,
+        boards: nextBoards,
+      };
     });
   }
 
-  private patchCurrentBoard(updater: (board: Board) => Board): void {
-    const current = this.currentBoard();
+  getTasksByColumnId(columnId: string): Task[] {
+    const column = this.columns().find((c) => c.id === columnId);
+    if (!column) return [];
 
-    if (!current) {
-      return;
-    }
+    const tasksMap = new Map(this.tasks().map((task) => [task.id, task]));
 
-    this._boards.update((boards) =>
-      boards.map((board) => (board.id === current.id ? updater(board) : board)),
-    );
+    return column.tasksIds
+      .map((taskId) => tasksMap.get(taskId))
+      .filter((task): task is Task => !!task);
+  }
+
+  hasTaskInColumn(columnId: string, taskId: string): boolean {
+    return this.getTasksByColumnId(columnId).some((task) => task.id === taskId);
+  }
+
+  private updateKanban(updater: (kanban: KanbanState) => KanbanState): void {
+    this._kanban.update((state) => updater(state));
+  }
+
+  private patchBoardById(boardId: string, patch: Partial<Omit<Board, "id" | "publicId">>): void {
+    this.updateKanban((state) => ({
+      ...state,
+      boards: state.boards.map((board) => (board.id === boardId ? { ...board, ...patch } : board)),
+    }));
+  }
+
+  private patchColumnById(columnId: string, patch: Partial<Omit<Column, "id" | "boardId">>): void {
+    this.updateKanban((state) => ({
+      ...state,
+      columns: state.columns.map((column) =>
+        column.id === columnId ? { ...column, ...patch } : column,
+      ),
+    }));
+  }
+
+  private patchTaskById(taskId: string, patch: Partial<Omit<Task, "id" | "columnId">>): void {
+    this.updateKanban((state) => ({
+      ...state,
+      tasks: state.tasks.map((task) => (task.id === taskId ? { ...task, ...patch } : task)),
+    }));
   }
 }

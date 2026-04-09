@@ -70,11 +70,11 @@
           {{ column.header }}
         </ng-container>
 
-        @for (task of column.tasks; track task.id) {
+        @for (task of tasksByColumnId(column.id); track task.id) {
           <os-task-card
             [taskPriority]="task.priority"
             (edit)="onEditTask({ columnId: column.id, taskId: task.id })"
-            (delete)="onDeleteTask(column.id, task.id)"
+            (delete)="onDeleteTask(task.id)"
             cdkDrag
             [cdkDragData]="task"
             (cdkDragStarted)="onDragStarted()"
@@ -213,7 +213,7 @@
             </button>
 
             <a
-              [routerLink]="['/kanban', board.id]"
+              [routerLink]="['/kanban', board.publicId]"
               class="flex min-w-0 flex-1 items-center gap-3"
               [style.pointer-events]="board.id === currentBoard().id ? 'none' : 'auto'"
               [class.cursor-not-allowed]="board.id === currentBoard().id"

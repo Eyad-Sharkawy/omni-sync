@@ -22,9 +22,9 @@ import {
 import { KanbanStore } from "../../services/kanban-store";
 import { Task } from "../../../../core/models/task";
 import { ALL_COLORS, OmniSyncColors } from "../../../../shared/UI/colors";
-import { generateId } from "../../../../shared/functions/generate-id";
 import { TaskTag } from "../../../../shared/components/task-tag/task-tag";
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from "@angular/cdk/drag-drop";
+import { nanoid } from "nanoid";
 
 @Component({
   selector: "os-add-task-form",
@@ -119,9 +119,9 @@ export class AddTaskForm {
         this.selectedColumn.set(selectedCol);
       }
 
-      const selectedTask = this.selectedColumn().tasks.find(
-        (task) => this.initialInfo().taskId === task.id,
-      );
+      const selectedTask = this.kanbanStore
+        .tasks()
+        .find((task) => task.id === this.initialInfo().taskId);
 
       if (selectedTask) {
         this.selectedTags.set(selectedTask.tags);
@@ -164,8 +164,8 @@ export class AddTaskForm {
 
     const taskId = this.initialInfo().taskId;
 
-    if (taskId && this.selectedColumn().tasks.some((task) => task.id === taskId)) {
-      this.kanbanStore.updateTask(this.selectedColumn().id, taskId, {
+    if (taskId && !this.kanbanStore.hasTaskInColumn(this.selectedColumn().id, taskId)) {
+      this.kanbanStore.updateTask(taskId, {
         title: title.trim(),
         priority: priority,
         startDate: start,
@@ -173,7 +173,7 @@ export class AddTaskForm {
         tags: this.selectedTags(),
       });
     } else {
-      this.kanbanStore.addTask(column, {
+      this.kanbanStore.addTaskToColumn(column, {
         title: title.trim(),
         priority: priority,
         startDate: start,
@@ -209,7 +209,7 @@ export class AddTaskForm {
     this.selectedTags.update((tags) => [
       ...tags,
       {
-        id: generateId(),
+        id: nanoid(),
         text: value,
         color: this.color(),
       },
