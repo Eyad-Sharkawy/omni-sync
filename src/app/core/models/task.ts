@@ -3,6 +3,7 @@ import { OmniSyncColors } from "../../shared/UI/colors";
 export interface Task {
   id: string;
   title: string;
+  columnId: string;
   tags: TaskTags[];
   priority: "low" | "medium" | "high";
   startDate: Date;

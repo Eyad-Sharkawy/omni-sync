@@ -96,7 +96,7 @@ export class AddColumnForm {
     if (selectedColumnInfo) {
       this.kanbanStore.updateColumn(selectedColumnInfo.columnId, { header, color });
     } else {
-      this.kanbanStore.addColumn({ header, color });
+      this.kanbanStore.addColumnToBoard({ header, color });
     }
 
     this.onModalClosed();
