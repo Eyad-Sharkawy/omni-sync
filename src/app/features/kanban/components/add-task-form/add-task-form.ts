@@ -39,7 +39,7 @@ export class AddTaskForm {
   readonly closed = output<void>();
   readonly selectedColumnChanged = output<string>();
 
-  readonly columns = this.kanbanStore.columns;
+  readonly columns = this.kanbanStore.currentColumns;
   readonly selectedColumn = signal(this.columns()[0]);
   readonly selectedTags = signal<Task["tags"]>([]);
   readonly isEditMode = signal(false);
