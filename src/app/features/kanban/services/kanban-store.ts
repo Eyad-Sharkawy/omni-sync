@@ -40,9 +40,7 @@ export interface UpdateBoardInput {
   dueDate?: Date;
 }
 
-@Injectable({
-  providedIn: "root",
-})
+@Injectable()
 export class KanbanStore {
   private readonly storage = inject(Storage);
   private readonly localStorage = inject(LOCAL_STORAGE);

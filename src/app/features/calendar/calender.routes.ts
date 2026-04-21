@@ -1,16 +1,16 @@
 import { Routes } from "@angular/router";
 
-import { Calender } from "./calender";
+import { Calendar } from "../calender/calender";
 
-export const CALENDER_ROUTES: Routes = [
+export const CALENDAR_ROUTES: Routes = [
   {
     path: "",
-    component: Calender,
+    component: Calendar,
     title: "Calender - Omni Sync",
   },
   {
     path: ":boardId",
-    component: Calender,
+    component: Calendar,
     title: "Calender - Omni Sync",
   },
 ];

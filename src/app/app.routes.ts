@@ -1,5 +1,6 @@
 import { Routes } from "@angular/router";
 import { landingPage } from "./layout/landing-page/landing-page";
+import { KanbanStore } from "./features/kanban/services/kanban-store";
 
 export const routes: Routes = [
   {
@@ -8,12 +9,19 @@ export const routes: Routes = [
     title: "Omni Sync",
   },
   {
-    path: "kanban",
-    loadChildren: () => import("./features/kanban/kanban.routes").then((mod) => mod.KANBAN_ROUTES),
-  },
-  {
-    path: "calender",
-    loadChildren: () =>
-      import("./features/calender/calender.routes").then((mod) => mod.CALENDER_ROUTES),
+    path: "",
+    providers: [KanbanStore],
+    children: [
+      {
+        path: "kanban",
+        loadChildren: () =>
+          import("./features/kanban/kanban.routes").then((mod) => mod.KANBAN_ROUTES),
+      },
+      {
+        path: "calender",
+        loadChildren: () =>
+          import("./features/calendar/calender.routes").then((mod) => mod.CALENDAR_ROUTES),
+      },
+    ],
   },
 ];

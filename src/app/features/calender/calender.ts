@@ -25,10 +25,10 @@ type CalendarChangeView = (viewName: string, date?: Date | string) => void;
 @Component({
   selector: "os-calender",
   imports: [CommonModule, FullCalendarModule, ViewBoardsModal],
-  templateUrl: "./calender.html",
-  styleUrl: "./calender.css",
+  templateUrl: "./calendar.html",
+  styleUrl: "./calendar.css",
 })
-export class Calender {
+export class Calendar {
   private static readonly LAST_SORT_ORDER = Number.MAX_SAFE_INTEGER;
 
   private readonly router = inject(Router);
@@ -172,7 +172,7 @@ export class Calender {
   }
 
   private readSortOrder(event: CalendarSortEvent, key: "columnOrder" | "taskOrder"): number {
-    return Number(event.extendedProps?.[key] ?? Calender.LAST_SORT_ORDER);
+    return Number(event.extendedProps?.[key] ?? Calendar.LAST_SORT_ORDER);
   }
 
   private buildCalendarEvents() {
@@ -188,8 +188,8 @@ export class Calender {
       end: task.dueDate,
       color: `var(--color-os-${this.kanbanStore.getColumnById(task.columnId)?.color ?? "indigo"})`,
       extendedProps: {
-        columnOrder: columnOrderById.get(task.columnId) ?? Calender.LAST_SORT_ORDER,
-        taskOrder: taskOrderById.get(task.id) ?? Calender.LAST_SORT_ORDER,
+        columnOrder: columnOrderById.get(task.columnId) ?? Calendar.LAST_SORT_ORDER,
+        taskOrder: taskOrderById.get(task.id) ?? Calendar.LAST_SORT_ORDER,
       },
     }));
   }
