@@ -76,13 +76,13 @@ export class Calender {
     });
 
     effect(() => {
+      this.calendarEvents();
       const calendarApi = this.calendarRef()?.getApi();
       if (!calendarApi) {
         return;
       }
 
-      calendarApi.removeAllEvents();
-      calendarApi.addEventSource(this.calendarEvents());
+      calendarApi.refetchEvents();
     });
   }
 
@@ -114,7 +114,9 @@ export class Calender {
       ),
     eventOrder: (a, b) => this.compareEvents(a as CalendarSortEvent, b as CalendarSortEvent),
     eventOrderStrict: true,
-    events: this.calendarEvents(),
+    events: (_info, successCallback) => {
+      successCallback(this.calendarEvents());
+    },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     eventClick: (arg) => {
       /* empty */
@@ -198,6 +200,15 @@ export class Calender {
 
   closeModal(): void {
     this.viewBoards.set(false);
+  }
+
+  onSelectBoard(boardPublicId: string): void {
+    const matchedBoard = this.kanbanStore.getBoardByPublicId(boardPublicId);
+    if (matchedBoard) {
+      this.kanbanStore.setCurrentBoard(matchedBoard.id);
+    }
+
+    this.closeModal();
   }
 
   onDropBoard(event: CdkDragDrop<Board[]>): void {
