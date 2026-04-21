@@ -11,4 +11,9 @@ export const routes: Routes = [
     path: "kanban",
     loadChildren: () => import("./features/kanban/kanban.routes").then((mod) => mod.KANBAN_ROUTES),
   },
+  {
+    path: "calender",
+    loadChildren: () =>
+      import("./features/calender/calender.routes").then((mod) => mod.CALENDER_ROUTES),
+  },
 ];

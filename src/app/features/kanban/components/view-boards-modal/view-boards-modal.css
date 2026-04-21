@@ -1,0 +1,16 @@
+.dot-grid-handle .dot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.dot-grid-handle:hover .dot-grid {
+  filter: drop-shadow(0 0 10px rgb(30 64 175 / 38%));
+}
+
+.dot-grid-handle .dot-grid__dot {
+  height: 2px;
+  width: 2px;
+  border-radius: 9999px;
+  background: currentcolor;
+}

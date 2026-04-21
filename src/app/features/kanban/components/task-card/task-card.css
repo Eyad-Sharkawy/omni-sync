@@ -1,4 +1,4 @@
-@reference "../../../../styles.css";
+@reference "../../../../../styles.css";
 
 :host {
   @apply bg-surface2 border-border rounded-lg p-3.5;
@@ -21,5 +21,5 @@
 }
 
 .dot-grid-handle .dot-grid__dot {
-  @apply bg-current block h-[2px] w-[2px] rounded-full;
+  @apply block h-[2px] w-[2px] rounded-full bg-current;
 }

@@ -8,7 +8,7 @@ import {
 } from "@angular/core";
 import { CdkDragHandle } from "@angular/cdk/drag-drop";
 import { CdkScrollable } from "@angular/cdk/scrolling";
-import { OmniSyncColors } from "../../UI/colors";
+import { OmniSyncColors } from "../../../../shared/UI/colors";
 import { TaskCard } from "../task-card/task-card";
 import { NgOptimizedImage } from "@angular/common";
 

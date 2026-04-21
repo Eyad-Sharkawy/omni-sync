@@ -15,13 +15,25 @@
         routerLinkActive="active-link"
         class="flex items-center gap-3 overflow-hidden px-4 py-2 whitespace-nowrap"
       >
-        <span class="text-base" aria-hidden="true">⬡</span>
+        <span class="flex items-center text-base" aria-hidden="true">⬡</span>
         @if (!collapsed() || isMobile()) {
-          <span>Board</span>
+          <span class="flex items-center">Board</span>
+        }
+      </a>
+
+      <a
+        routerLink="/calender"
+        routerLinkActive="active-link"
+        class="item-center flex gap-3 overflow-hidden px-4 py-2 whitespace-nowrap"
+      >
+        <span class="flex items-center text-base" aria-hidden="true">◫</span>
+        @if (!collapsed() || isMobile()) {
+          <span class="flex items-center">Calender</span>
         }
       </a>
     </li>
   </ul>
+
   @if (!isMobile()) {
     <footer class="border-t-border mt-auto flex flex-col border-t py-2.5">
       <button

@@ -18,5 +18,5 @@
 }
 
 .dot-grid-handle .dot-grid__dot {
-  @apply bg-current block h-[2px] w-[2px] rounded-full;
+  @apply block h-[2px] w-[2px] rounded-full bg-current;
 }

@@ -1,0 +1,44 @@
+<main class="flex h-full min-h-0 flex-1 flex-col overflow-x-auto px-8 py-9">
+  <header class="mb-6 flex items-center gap-2">
+    <button
+      class="bg-os-indigo cursor-pointer rounded-lg p-2.5 font-mono text-xs font-medium tracking-[0.3px] transition hover:opacity-85"
+      (click)="onViewBoards()"
+    >
+      Change boards
+    </button>
+
+    <span class="text-muted">|</span>
+
+    <h2 class="text-secondary text-sm font-bold">
+      {{ currentBoard().name }}
+    </h2>
+
+    <!--    <span class="text-muted font-mono" aria-hidden="true">·</span>-->
+
+    <!--    <span class="text-muted font-mono text-sm tracking-[1.5px]">-->
+    <!--      <time [attr.datetime]="currentBoard().startDate | date: 'yyyy-MM-dd'">-->
+    <!--        {{ currentBoard().startDate | date }}-->
+    <!--      </time>-->
+
+    <!--      <span aria-hidden="true">→</span>-->
+
+    <!--      <time [attr.datetime]="currentBoard().dueDate | date: 'yyyy-MM-dd'">-->
+    <!--        {{ currentBoard().dueDate | date }}-->
+    <!--      </time>-->
+    <!--    </span>-->
+  </header>
+
+  <full-calendar #calendar class="min-h-0 flex-1" [options]="calendarOptions" />
+</main>
+
+@if (viewBoards()) {
+  <os-view-boards-modal
+    [boards]="boards()"
+    [currentBoard]="currentBoard()"
+    [readonlyMode]="true"
+    boardRoutePrefix="calender"
+    (closed)="closeModal()"
+    (dropBoard)="onDropBoard($event)"
+    (selectBoard)="closeModal()"
+  />
+}

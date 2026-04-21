@@ -1,0 +1,76 @@
+@reference "../../../styles.css";
+
+:host {
+  @apply relative isolate flex min-h-0 min-w-0 flex-1 overflow-x-auto;
+}
+
+:host ::ng-deep .fc {
+  --fc-page-bg-color: var(--color-bg);
+  --fc-neutral-bg-color: var(--color-surface);
+  --fc-neutral-text-color: var(--color-secondary);
+  --fc-border-color: var(--color-border);
+  --fc-button-bg-color: var(--color-surface2);
+  --fc-button-border-color: var(--color-border);
+  --fc-button-text-color: var(--color-primary);
+  --fc-button-hover-bg-color: var(--color-surface3);
+  --fc-button-hover-border-color: var(--color-border);
+  --fc-button-active-bg-color: var(--color-os-indigo);
+  --fc-button-active-border-color: var(--color-os-indigo);
+  --fc-today-bg-color: color-mix(in srgb, var(--color-os-indigo), transparent 88%);
+}
+
+:host ::ng-deep .fc .fc-toolbar-title,
+:host ::ng-deep .fc .fc-col-header-cell-cushion,
+:host ::ng-deep .fc .fc-daygrid-day-number,
+:host ::ng-deep .fc .fc-multimonth-title {
+  color: var(--color-primary);
+}
+
+:host ::ng-deep .fc-theme-standard td,
+:host ::ng-deep .fc-theme-standard th,
+:host ::ng-deep .fc-theme-standard .fc-scrollgrid {
+  border-color: var(--color-border);
+}
+
+:host ::ng-deep .fc .fc-toolbar-title.fc-title-clickable {
+  cursor: pointer;
+}
+
+:host ::ng-deep .fc .fc-multimonth-title {
+  cursor: pointer;
+}
+
+:host ::ng-deep full-calendar {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+:host ::ng-deep full-calendar .fc {
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  :host ::ng-deep .fc .fc-header-toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  :host ::ng-deep .fc .fc-header-toolbar .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  :host ::ng-deep .fc .fc-toolbar-title {
+    max-width: 100%;
+    font-size: 2rem;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}

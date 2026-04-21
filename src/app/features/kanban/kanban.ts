@@ -8,14 +8,13 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
-import { DatePipe, NgOptimizedImage } from "@angular/common";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { DatePipe } from "@angular/common";
+import { ActivatedRoute, Router } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { map } from "rxjs";
 
 import {
   CdkDrag,
-  CdkDragHandle,
   CdkDragDrop,
   CdkDragMove,
   CdkDropList,
@@ -23,9 +22,9 @@ import {
 } from "@angular/cdk/drag-drop";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 
-import { TaskCard } from "../../shared/components/task-card/task-card";
-import { TasksColumn } from "../../shared/components/tasks-column/tasks-column";
-import { TaskTag } from "../../shared/components/task-tag/task-tag";
+import { TaskCard } from "./components/task-card/task-card";
+import { TasksColumn } from "./components/tasks-column/tasks-column";
+import { TaskTag } from "./components/task-tag/task-tag";
 import { KanbanStore } from "./services/kanban-store";
 import { Modal } from "../../shared/components/modal/modal";
 import { Column } from "../../core/models/column";
@@ -35,6 +34,7 @@ import { AddTaskForm } from "./components/add-task-form/add-task-form";
 import { OmniSyncColors } from "../../shared/UI/colors";
 import { AddColumnForm } from "./components/add-column-form/add-column-form";
 import { CreateBoardForm } from "./components/create-board-form/create-board-form";
+import { ViewBoardsModal } from "./components/view-boards-modal/view-boards-modal";
 
 interface ModalTaskInfo {
   columnId: string;
@@ -50,17 +50,15 @@ type ModalType = "addTask" | "addColumn" | "addBoard";
     TasksColumn,
     TaskTag,
     DatePipe,
-    NgOptimizedImage,
     Modal,
     AddTaskForm,
     CdkDrag,
-    CdkDragHandle,
     CdkDropList,
     CdkDropListGroup,
     CdkScrollable,
     AddColumnForm,
     CreateBoardForm,
-    RouterLink,
+    ViewBoardsModal,
   ],
   templateUrl: "./kanban.html",
   styleUrl: "./kanban.css",

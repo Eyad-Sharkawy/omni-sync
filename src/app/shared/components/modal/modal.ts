@@ -2,10 +2,10 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   inject,
   input,
-  OnDestroy,
   output,
   TemplateRef,
   viewChild,
@@ -26,8 +26,9 @@ import { OmniSyncColors } from "../../UI/colors";
     "[style.--color]": "'var(--color-os-' + color() + ')'",
   },
 })
-export class Modal implements OnDestroy {
+export class Modal {
   private readonly overlay = inject(Overlay);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly modalTemplate = viewChild.required<TemplateRef<unknown>>("modalTemplate");
   private readonly dialogRoot = viewChild.required<ElementRef<HTMLElement>>("dialogRoot");
@@ -60,10 +61,10 @@ export class Modal implements OnDestroy {
         }
       });
     });
-  }
 
-  ngOnDestroy() {
-    this.overlayRef?.dispose();
+    this.destroyRef.onDestroy(() => {
+      this.overlayRef?.dispose();
+    });
   }
 
   requestClose(): void {

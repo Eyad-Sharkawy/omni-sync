@@ -40,7 +40,9 @@ export interface UpdateBoardInput {
   dueDate?: Date;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: "root",
+})
 export class KanbanStore {
   private readonly storage = inject(Storage);
   private readonly localStorage = inject(LOCAL_STORAGE);
@@ -75,6 +77,18 @@ export class KanbanStore {
     if (!board) return [];
     const byId = new Map(this.columns().map((c) => [c.id, c]));
     return board.columnsIds.map((id) => byId.get(id)).filter((c): c is Column => !!c);
+  });
+
+  readonly currentTasks = computed(() => {
+    const columns = this.currentColumns();
+
+    if (!columns) return [];
+
+    const byId = new Map(this.tasks().map((task) => [task.id, task]));
+
+    return columns.flatMap((column) =>
+      column.tasksIds.map((id) => byId.get(id)).filter((task): task is Task => !!task),
+    );
   });
 
   constructor() {

@@ -1,0 +1,121 @@
+<os-modal title="Your boards" color="indigo" (closed)="closed.emit()">
+  <div class="px-6 pt-5 pb-6">
+    <div class="mb-4 flex items-center justify-between border-b border-zinc-800/80 pb-3">
+      <p class="text-muted text-[11px] font-semibold tracking-[0.14em] uppercase">
+        Workspace boards
+      </p>
+      <div class="flex items-center gap-2">
+        <span
+          class="bg-os-indigo/18 text-os-indigo rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide"
+        >
+          {{ boards().length }} total
+        </span>
+
+        @if (!readonlyMode()) {
+          <button
+            type="button"
+            title="Create board"
+            (click)="createBoard.emit()"
+            class="bg-os-indigo/20 text-os-indigo hover:bg-os-indigo/35 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-sm leading-none font-semibold transition transition-colors"
+          >
+            +
+          </button>
+        }
+      </div>
+    </div>
+
+    <div
+      class="max-h-[340px] space-y-2 overflow-y-auto pr-1"
+      cdkDropList
+      cdkDropListLockAxis="y"
+      [cdkDropListData]="boards()"
+      (cdkDropListDropped)="dropBoard.emit($event)"
+    >
+      @for (board of boards(); track board.id) {
+        <div
+          class="group border-border bg-surface/40 hover:border-os-indigo/60 hover:bg-os-indigo/10 flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-200"
+          [class.border-os-indigo]="board.id === currentBoard().id"
+          [class.bg-os-indigo]="board.id === currentBoard().id"
+          cdkDrag
+          [cdkDragData]="board"
+        >
+          <button
+            type="button"
+            title="Reorder board"
+            cdkDragHandle
+            class="dot-grid-handle text-muted hover:text-primary cursor-grab rounded-sm p-1 transition active:cursor-grabbing"
+            aria-label="Reorder board"
+          >
+            <span class="dot-grid" aria-hidden="true">
+              @for (dot of [0, 1, 2, 3, 4, 5, 6, 7, 8]; track dot) {
+                <span class="dot-grid__dot"></span>
+              }
+            </span>
+          </button>
+
+          <a
+            [routerLink]="['/', boardRoutePrefix(), board.publicId]"
+            class="flex min-w-0 flex-1 items-center gap-3"
+            [style.pointer-events]="board.id === currentBoard().id ? 'none' : 'auto'"
+            [class.cursor-not-allowed]="board.id === currentBoard().id"
+            [class.opacity-80]="board.id === currentBoard().id"
+            [attr.aria-disabled]="board.id === currentBoard().id ? 'true' : null"
+            [attr.tabindex]="board.id === currentBoard().id ? -1 : null"
+            (click)="selectBoard.emit(board.publicId)"
+          >
+            <div class="min-w-0 flex-1">
+              <p
+                class="text-secondary group-hover:text-primary truncate text-sm font-semibold transition-colors"
+                [class.text-primary]="board.id === currentBoard().id"
+              >
+                {{ board.name }}
+              </p>
+              <p class="text-muted mt-1 text-[11px] tracking-wide">Board {{ $index + 1 }}</p>
+            </div>
+
+            @if (board.id === currentBoard().id) {
+              <span
+                class="bg-os-indigo/20 text-os-indigo rounded-full px-2 py-0.5 text-[10px] font-semibold"
+              >
+                Selected
+              </span>
+            }
+          </a>
+
+          @if (!readonlyMode()) {
+            <div class="flex items-center gap-1">
+              <button
+                type="button"
+                title="Delete board"
+                (click)="deleteBoard.emit(board.id)"
+                [disabled]="boards().length === 1"
+                class="hover:bg-surface3 disabled:text-muted/50 cursor-pointer rounded-md p-0.5 transition disabled:cursor-not-allowed"
+              >
+                <img
+                  ngSrc="/images/icons/trash-can.svg"
+                  alt="Delete board"
+                  width="15"
+                  height="15"
+                />
+              </button>
+
+              <button
+                type="button"
+                title="Edit board"
+                (click)="editBoard.emit(board.id)"
+                class="hover:bg-surface3 cursor-pointer rounded-sm p-0.5 transition"
+              >
+                <img
+                  ngSrc="/images/icons/edit-button.svg"
+                  alt="Edit board"
+                  width="15"
+                  height="15"
+                />
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</os-modal>

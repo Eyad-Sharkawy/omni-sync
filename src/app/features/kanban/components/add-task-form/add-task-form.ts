@@ -22,7 +22,7 @@ import {
 import { KanbanStore } from "../../services/kanban-store";
 import { Task } from "../../../../core/models/task";
 import { ALL_COLORS, OmniSyncColors } from "../../../../shared/UI/colors";
-import { TaskTag } from "../../../../shared/components/task-tag/task-tag";
+import { TaskTag } from "../task-tag/task-tag";
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from "@angular/cdk/drag-drop";
 import { nanoid } from "nanoid";
 
@@ -52,7 +52,7 @@ export class AddTaskForm {
       title: new FormControl("", {
         validators: [Validators.required],
       }),
-      priority: new FormControl<"low" | "medium" | "high" | null>(null, {
+      priority: new FormControl<"low" | "medium" | "high" | null>("medium", {
         validators: [Validators.required],
       }),
       column: new FormControl("", {
@@ -164,7 +164,7 @@ export class AddTaskForm {
 
     const taskId = this.initialInfo().taskId;
 
-    if (taskId && !this.kanbanStore.hasTaskInColumn(this.selectedColumn().id, taskId)) {
+    if (taskId && this.kanbanStore.hasTaskInColumn(this.selectedColumn().id, taskId)) {
       this.kanbanStore.updateTask(taskId, {
         title: title.trim(),
         priority: priority,

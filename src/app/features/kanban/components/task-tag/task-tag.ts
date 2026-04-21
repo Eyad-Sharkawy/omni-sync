@@ -1,6 +1,6 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
-import { OmniSyncColors } from "../../UI/colors";
+import { OmniSyncColors } from "../../../../shared/UI/colors";
 
 @Component({
   selector: "os-task-tag",
