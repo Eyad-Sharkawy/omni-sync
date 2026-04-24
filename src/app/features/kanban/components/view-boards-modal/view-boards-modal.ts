@@ -15,7 +15,7 @@ import { Board } from "../../../../core/models/board";
 export class ViewBoardsModal {
   readonly boards = input.required<Board[]>();
   readonly currentBoard = input.required<Board>();
-  readonly boardRoutePrefix = input<"kanban" | "calender">("kanban");
+  readonly boardRoutePrefix = input<"kanban" | "calendar">("kanban");
   readonly readonlyMode = input(false);
 
   readonly closed = output<void>();

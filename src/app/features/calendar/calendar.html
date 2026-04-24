@@ -12,20 +12,6 @@
     <h2 class="text-secondary text-sm font-bold">
       {{ currentBoard().name }}
     </h2>
-
-    <!--    <span class="text-muted font-mono" aria-hidden="true">·</span>-->
-
-    <!--    <span class="text-muted font-mono text-sm tracking-[1.5px]">-->
-    <!--      <time [attr.datetime]="currentBoard().startDate | date: 'yyyy-MM-dd'">-->
-    <!--        {{ currentBoard().startDate | date }}-->
-    <!--      </time>-->
-
-    <!--      <span aria-hidden="true">→</span>-->
-
-    <!--      <time [attr.datetime]="currentBoard().dueDate | date: 'yyyy-MM-dd'">-->
-    <!--        {{ currentBoard().dueDate | date }}-->
-    <!--      </time>-->
-    <!--    </span>-->
   </header>
 
   <full-calendar #calendar class="min-h-0 flex-1" [options]="calendarOptions" />
@@ -36,7 +22,7 @@
     [boards]="boards()"
     [currentBoard]="currentBoard()"
     [readonlyMode]="true"
-    boardRoutePrefix="calender"
+    boardRoutePrefix="calendar"
     (closed)="closeModal()"
     (dropBoard)="onDropBoard($event)"
     (selectBoard)="onSelectBoard($event)"

@@ -23,7 +23,7 @@ interface CalendarSortEvent {
 type CalendarChangeView = (viewName: string, date?: Date | string) => void;
 
 @Component({
-  selector: "os-calender",
+  selector: "os-calendar",
   imports: [CommonModule, FullCalendarModule, ViewBoardsModal],
   templateUrl: "./calendar.html",
   styleUrl: "./calendar.css",
@@ -57,7 +57,7 @@ export class Calendar {
       }
 
       if (!boardPublicId) {
-        void this.router.navigate(["/calender", this.currentBoard().publicId], {
+        void this.router.navigate(["/calendar", this.currentBoard().publicId], {
           replaceUrl: true,
         });
         return;
@@ -66,7 +66,7 @@ export class Calendar {
       const matchedBoard = this.kanbanStore.getBoardByPublicId(boardPublicId);
 
       if (!matchedBoard) {
-        void this.router.navigate(["/calender", this.currentBoard().publicId], {
+        void this.router.navigate(["/calendar", this.currentBoard().publicId], {
           replaceUrl: true,
         });
         return;
@@ -117,9 +117,8 @@ export class Calendar {
     events: (_info, successCallback) => {
       successCallback(this.calendarEvents());
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    eventClick: (arg) => {
-      /* empty */
+    eventClick: () => {
+      void this.router.navigate(["/kanban", this.currentBoard().publicId]);
     },
   };
 

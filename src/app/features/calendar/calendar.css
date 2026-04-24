@@ -50,6 +50,10 @@
   height: 100%;
 }
 
+:host ::ng-deep .fc-event-title-container {
+  cursor: pointer;
+}
+
 @media (max-width: 640px) {
   :host ::ng-deep .fc .fc-header-toolbar {
     display: grid;
