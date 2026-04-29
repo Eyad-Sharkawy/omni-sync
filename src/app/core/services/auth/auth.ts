@@ -6,6 +6,7 @@ import {
   ActionCodeSettings,
   authState,
   Auth as FireAuth,
+  AuthError,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   sendSignInLinkToEmail,
@@ -14,6 +15,7 @@ import {
   signInWithEmailLink,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   createUserWithEmailAndPassword,
 } from "@angular/fire/auth";
@@ -52,6 +54,11 @@ export class Auth {
     try {
       await signInWithPopup(this.auth, provider);
     } catch (error) {
+      const code = (error as AuthError | { code?: string } | undefined)?.code;
+      if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request") {
+        await signInWithRedirect(this.auth, provider);
+        throw { code: "auth/redirect-started" };
+      }
       console.error("login Failed:", error);
       throw error;
     }

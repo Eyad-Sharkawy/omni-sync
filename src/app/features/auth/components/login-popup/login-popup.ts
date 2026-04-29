@@ -282,6 +282,8 @@ export class LoginPopup {
         return "Incorrect email or password.";
       case "auth/email-not-verified":
         return "Email not verified. We sent a new verification email.";
+      case "auth/redirect-started":
+        return "Redirecting to Google sign-in...";
       case "auth/missing-email":
         return "Please enter your email address.";
       case "auth/user-disabled":
