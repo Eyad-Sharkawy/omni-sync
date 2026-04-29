@@ -34,8 +34,8 @@
     </li>
   </ul>
 
-  @if (!isMobile()) {
-    <footer class="border-t-border mt-auto flex flex-col border-t py-2.5">
+  <footer class="border-t-border mt-auto flex flex-col border-t py-2.5">
+    @if (!isMobile()) {
       <button
         type="button"
         [title]="collapsed() ? 'Expand' : 'Collapse'"
@@ -47,6 +47,26 @@
           <span class="transition">Collapse</span>
         }
       </button>
-    </footer>
-  }
+    } @else {
+      @if (auth.currentUser()) {
+        <button
+          class="text-primary bg-os-indigo cursor-pointer rounded-lg px-7 py-3.5 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
+          (click)="auth.logout()"
+        >
+          Sign Out
+        </button>
+      } @else {
+        <button
+          class="text-primary bg-os-indigo cursor-pointer rounded-lg px-6 py-3 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
+          (click)="openLoginPopup()"
+        >
+          Sign in
+        </button>
+      }
+    }
+  </footer>
 </aside>
+
+@if (isLoginPopupOpen()) {
+  <os-login-popup (closed)="closeLoginPopup()" />
+}

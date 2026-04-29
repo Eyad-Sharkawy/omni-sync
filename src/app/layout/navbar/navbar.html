@@ -21,4 +21,28 @@
     />
     <h1 class="text-primary text-[20px] font-bold">Omni Sync</h1>
   </a>
+
+  @if (isLandingPage() || !isMobile()) {
+    <div class="ml-auto font-mono">
+      @if (auth.currentUser()) {
+        <button
+          class="bg-os-indigo cursor-pointer rounded-lg px-6 py-3 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
+          (click)="auth.logout()"
+        >
+          Sign Out
+        </button>
+      } @else {
+        <button
+          class="bg-os-indigo cursor-pointer rounded-lg px-6 py-3 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
+          (click)="openLoginPopup()"
+        >
+          Sign in
+        </button>
+      }
+    </div>
+  }
 </nav>
+
+@if (isLoginPopupOpen()) {
+  <os-login-popup (closed)="closeLoginPopup()" />
+}

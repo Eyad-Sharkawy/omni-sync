@@ -1,12 +1,13 @@
 import { computed, effect, inject, Injectable, signal } from "@angular/core";
 
 import { Board } from "../../../core/models/board";
-import { Storage } from "../../../core/services/storage";
+import { Storage } from "../../../core/services/storage/storage";
 import { Column } from "../../../core/models/column";
 import { Task } from "../../../core/models/task";
 import { OmniSyncColors } from "../../../shared/UI/colors";
 import { LOCAL_STORAGE } from "../../../core/tokens/local-storage";
 import { nanoid } from "nanoid";
+import { Auth } from "../../../core/services/auth/auth";
 
 type KanbanState = ReturnType<Storage["getKanban"]>;
 
@@ -44,9 +45,14 @@ export interface UpdateBoardInput {
 export class KanbanStore {
   private readonly storage = inject(Storage);
   private readonly localStorage = inject(LOCAL_STORAGE);
+  private readonly auth = inject(Auth);
   private readonly CURRENT_BOARD_KEY = "omni-sync.currentBoardId";
+  private readonly GUEST_SCOPE = "guest";
 
   private readonly _kanban = signal<KanbanState>(this.storage.getKanban());
+  private readonly isHydrating = signal(false);
+  private readonly FIRESTORE_SYNC_DEBOUNCE_MS = 800;
+  private firestoreSyncTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly boards = computed(() => this._kanban().boards);
   readonly columns = computed(() => this._kanban().columns);
@@ -90,15 +96,24 @@ export class KanbanStore {
   });
 
   constructor() {
+    effect(() => {
+      void this.hydrateKanbanByAuthState();
+    });
+
     //Persist to LocalStorage only when board state actually changes.
     let isFirstRun = true;
     let lastSerialized = JSON.stringify(this._kanban());
 
     effect(() => {
       const kanban = this._kanban();
+      const currentUser = this.auth.currentUser();
 
       if (isFirstRun) {
         isFirstRun = false;
+        return;
+      }
+
+      if (this.isHydrating()) {
         return;
       }
 
@@ -110,6 +125,11 @@ export class KanbanStore {
 
       lastSerialized = nextSerialized;
 
+      if (currentUser) {
+        this.scheduleFirestoreSync(currentUser.uid, kanban);
+        return;
+      }
+
       this.storage.setKanban(kanban.boards, kanban.columns, kanban.tasks);
     });
 
@@ -117,6 +137,7 @@ export class KanbanStore {
     effect(() => {
       const selectedId = this._currentBoardId();
       const boards = this.boards();
+      const key = this.getCurrentBoardStorageKey();
 
       if (!this.canUseLocalStorage()) {
         return;
@@ -128,11 +149,11 @@ export class KanbanStore {
       }
 
       if (!selectedId) {
-        this.localStorage.removeItem(this.CURRENT_BOARD_KEY);
+        this.localStorage.removeItem(key);
         return;
       }
 
-      this.localStorage.setItem(this.CURRENT_BOARD_KEY, selectedId);
+      this.localStorage.setItem(key, selectedId);
     });
   }
 
@@ -145,7 +166,7 @@ export class KanbanStore {
       return this.boards()[0].id;
     }
 
-    const currentBoardId = this.localStorage.getItem(this.CURRENT_BOARD_KEY);
+    const currentBoardId = this.localStorage.getItem(this.getCurrentBoardStorageKey());
 
     return currentBoardId && currentBoardId.trim().length > 0
       ? currentBoardId
@@ -158,6 +179,48 @@ export class KanbanStore {
       typeof this.localStorage?.setItem === "function" &&
       typeof this.localStorage?.removeItem === "function"
     );
+  }
+
+  private async hydrateKanbanByAuthState(): Promise<void> {
+    const user = this.auth.currentUser();
+    this.isHydrating.set(true);
+    try {
+      const kanban = user ? await this.storage.getKanbanForUser(user.uid) : this.storage.getKanban();
+      this._kanban.set(kanban);
+
+      const storedBoardId = this.getStoredCurrentBoardId();
+      const fallbackBoardId = kanban.boards[0]?.id ?? "";
+      const nextBoardId =
+        storedBoardId && kanban.boards.some((board) => board.id === storedBoardId)
+          ? storedBoardId
+          : fallbackBoardId;
+
+      this._currentBoardId.set(nextBoardId);
+    } finally {
+      this.isHydrating.set(false);
+    }
+  }
+
+  private getCurrentBoardStorageKey(): string {
+    const userId = this.auth.currentUser()?.uid ?? this.GUEST_SCOPE;
+    return `${this.CURRENT_BOARD_KEY}.${userId}`;
+  }
+
+  private scheduleFirestoreSync(userId: string, kanban: KanbanState): void {
+    if (this.firestoreSyncTimeoutId) {
+      clearTimeout(this.firestoreSyncTimeoutId);
+    }
+
+    const snapshot: KanbanState = {
+      boards: [...kanban.boards],
+      columns: [...kanban.columns],
+      tasks: [...kanban.tasks],
+    };
+
+    this.firestoreSyncTimeoutId = setTimeout(() => {
+      this.firestoreSyncTimeoutId = null;
+      void this.storage.setKanbanForUser(userId, snapshot.boards, snapshot.columns, snapshot.tasks);
+    }, this.FIRESTORE_SYNC_DEBOUNCE_MS);
   }
 
   getColumnById(columnId: string): Column | undefined {
