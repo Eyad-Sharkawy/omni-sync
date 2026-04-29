@@ -1,59 +1,135 @@
 # Omni Sync
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.1.
+Omni Sync is an Angular productivity app that combines a Kanban board and a Calendar view, with Firebase Authentication and Firestore persistence for signed-in users.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Kanban boards with columns, tasks, drag-and-drop, and board management
+- Calendar view synced from Kanban tasks
+- Authentication:
+  - Google sign-in (popup with redirect fallback)
+  - Email/password sign-up and sign-in
+  - Email verification flow
+  - Password reset
+  - Email link (passwordless) sign-in
+- Data persistence strategy:
+  - Signed-in users: Firestore (with local cache fallback)
+  - Guests: localStorage
 
-```bash
-ng serve
-```
+## Tech Stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Angular 21
+- Angular CDK
+- AngularFire + Firebase Auth + Firestore
+- FullCalendar
+- Tailwind CSS
 
-## Code scaffolding
+## Getting Started
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+### 1) Install dependencies
 
 ```bash
-ng build
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### 2) Run locally
 
 ```bash
-ng test
+npm start
 ```
 
-## Running end-to-end tests
+App runs at `http://localhost:4200`.
 
-For end-to-end (e2e) testing, run:
+## Scripts
+
+- `npm start` - Start dev server
+- `npm run build` - Generate environment file from env vars (if present), then build
+- `npm run watch` - Build in watch mode
+- `npm run test` - Run tests
+- `npm run lint` - Run lint checks
+- `npm run format` - Format code
+- `npm run check-all` - Format + lint
+
+## Environment Configuration
+
+This app expects Firebase web config under `environment.firebaseConfig`.
+
+For local development, keep:
+- `src/environments/environment.ts`
+- `src/environments/environment.development.ts`
+
+For CI/Vercel builds, `set-env.js` can generate `src/environments/environment.ts` from:
+
+- `FIREBASE_API_KEY`
+- `FIREBASE_AUTH_DOMAIN`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_STORAGE_BUCKET`
+- `FIREBASE_MESSAGING_SENDER_ID`
+- `FIREBASE_APP_ID`
+- `FIREBASE_MEASUREMENT_ID`
+
+If these vars are missing, generation is skipped and existing files are used.
+
+## Firestore Rules (Recommended)
+
+Current data model stores one document per user in `kanban/{uid}`.
+
+Use:
+
+```txt
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /kanban/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+## Firebase Auth Setup Checklist
+
+Enable in Firebase Console -> Authentication -> Sign-in method:
+
+- Google
+- Email/Password
+- Email link (passwordless)
+- Phone (optional; requires billing for real SMS)
+
+Also ensure:
+- Authorized domains include `localhost` and your production domain
+- Verification and reset email templates are configured
+
+## Deploying to Vercel
+
+1. Import the repo into Vercel
+2. Add the Firebase environment variables listed above
+3. Deploy
+
+Build command is already configured via npm:
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Troubleshooting
 
-## Additional Resources
+- `Could not resolve ../environments/environment`
+  - Ensure `src/environments/environment.ts` exists in repo or env generation runs before build.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `auth/popup-blocked`
+  - Browser blocked popup; app falls back to redirect flow.
+
+- Firestore empty but app has data
+  - App may be using local fallback due to Firestore permission issues.
+  - Verify Firestore rules and check browser console for `permission-denied`.
+
+## Notes on Security
+
+Firebase web config values in frontend (`apiKey`, `authDomain`, etc.) are not admin secrets. Security is enforced by:
+
+- Firestore/Storage Security Rules
+- Auth checks
+- App Check (recommended)
+
+Never commit admin credentials or service account keys.
