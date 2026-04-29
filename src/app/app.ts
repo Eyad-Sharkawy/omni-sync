@@ -6,7 +6,6 @@ import { filter, map } from "rxjs";
 
 import { Navbar } from "./layout/navbar/navbar";
 import { Sidebar } from "./layout/sidebar/sidebar";
-import { Auth } from "./core/services/auth/auth";
 
 @Component({
   selector: "os-root",
@@ -17,7 +16,6 @@ import { Auth } from "./core/services/auth/auth";
 export class App {
   private readonly router = inject(Router);
   private readonly breakPointObserver = inject(BreakpointObserver);
-  private readonly auth = inject(Auth);
   private readonly isLandingPage = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -36,11 +34,6 @@ export class App {
   readonly sideBarIsOpen = computed(
     () => this.shouldRenderSideBar() && (!this.isMobile() || this.sideBarIsToggled()),
   );
-
-  constructor() {
-    void this.auth.completeGoogleRedirectIfPresent().catch(() => undefined);
-    void this.auth.completeEmailLinkSignInIfPresent(globalThis.location?.href ?? "");
-  }
 
   onToggleSideBar() {
     this.sideBarIsToggled.update((prev) => !prev);

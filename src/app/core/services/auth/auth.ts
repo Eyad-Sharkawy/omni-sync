@@ -6,8 +6,6 @@ import {
   ActionCodeSettings,
   authState,
   Auth as FireAuth,
-  AuthError,
-  getRedirectResult,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   sendSignInLinkToEmail,
@@ -16,7 +14,6 @@ import {
   signInWithEmailLink,
   signInWithEmailAndPassword,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
   createUserWithEmailAndPassword,
 } from "@angular/fire/auth";
@@ -51,18 +48,7 @@ export class Auth {
 
   async loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-
-    try {
-      await signInWithPopup(this.auth, provider);
-    } catch (error) {
-      const code = (error as AuthError | { code?: string } | undefined)?.code;
-      if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request") {
-        await signInWithRedirect(this.auth, provider);
-        throw { code: "auth/redirect-started" };
-      }
-      console.error("login Failed:", error);
-      throw error;
-    }
+    await signInWithPopup(this.auth, provider);
   }
 
   async logout() {
@@ -138,13 +124,18 @@ export class Auth {
     }
   }
 
-  async completeGoogleRedirectIfPresent(): Promise<void> {
-    try {
-      await getRedirectResult(this.auth);
-    } catch (error) {
-      console.error("Google Redirect Sign In Error", error);
-      throw error;
-    }
+  getRuntimeFirebaseConfigSummary(): {
+    projectId?: string;
+    authDomain?: string;
+    apiKeyMasked?: string;
+  } {
+    const options = this.auth.app.options;
+    const apiKey = options.apiKey ?? "";
+    return {
+      projectId: options.projectId,
+      authDomain: options.authDomain,
+      apiKeyMasked: apiKey.length > 8 ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : apiKey,
+    };
   }
 
   private getActionCodeSettings(): ActionCodeSettings | undefined {
