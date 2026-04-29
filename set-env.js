@@ -3,40 +3,68 @@ const fs = require("fs");
 // Ensure the directory exists
 fs.mkdirSync("./src/environments", { recursive: true });
 
-const requiredVars = [
-  "FIREBASE_API_KEY",
-  "FIREBASE_AUTH_DOMAIN",
-  "FIREBASE_PROJECT_ID",
-  "FIREBASE_STORAGE_BUCKET",
-  "FIREBASE_MESSAGING_SENDER_ID",
-  "FIREBASE_APP_ID",
-  "FIREBASE_MEASUREMENT_ID",
-];
+const sanitize = (value) => String(value ?? "").trim();
+const getEnvValue = (upperSnake, camelCase) =>
+  sanitize(process.env[upperSnake] || process.env[camelCase] || "");
 
-const hasAllVars = requiredVars.every((key) => !!process.env[key]);
-if (!hasAllVars) {
-  console.log(
-    "set-env: Missing one or more FIREBASE_* vars. Skipping generation and keeping existing environment files.",
-  );
-  process.exit(0);
-}
+const firebaseEnv = {
+  apiKey: getEnvValue("FIREBASE_API_KEY", "apiKey"),
+  authDomain: getEnvValue("FIREBASE_AUTH_DOMAIN", "authDomain"),
+  projectId: getEnvValue("FIREBASE_PROJECT_ID", "projectId"),
+  storageBucket: getEnvValue("FIREBASE_STORAGE_BUCKET", "storageBucket"),
+  messagingSenderId: getEnvValue("FIREBASE_MESSAGING_SENDER_ID", "messagingSenderId"),
+  appId: getEnvValue("FIREBASE_APP_ID", "appId"),
+  measurementId: getEnvValue("FIREBASE_MEASUREMENT_ID", "measurementId"),
+};
 
-// Create the environment file content using Node's process.env
+const hasAllVars = Object.values(firebaseEnv).every((value) => !!value);
 const targetPath = "./src/environments/environment.ts";
-const envConfigFile = `
+const examplePath = "./src/environments/enviroment.example.ts";
+
+let envConfigFile = "";
+if (hasAllVars) {
+  const maskedApiKey =
+    firebaseEnv.apiKey.length > 10
+      ? `${firebaseEnv.apiKey.slice(0, 4)}...${firebaseEnv.apiKey.slice(-4)}`
+      : firebaseEnv.apiKey;
+  console.log(
+    `set-env: Using injected Firebase config (apiKey=${maskedApiKey}, projectId=${firebaseEnv.projectId})`,
+  );
+
+  envConfigFile = `
 export const environment = {
   production: true,
   firebaseConfig: {
-    apiKey: '${process.env.FIREBASE_API_KEY}',
-    authDomain: '${process.env.FIREBASE_AUTH_DOMAIN}',
-    projectId: '${process.env.FIREBASE_PROJECT_ID}',
-    storageBucket: '${process.env.FIREBASE_STORAGE_BUCKET}',
-    messagingSenderId: '${process.env.FIREBASE_MESSAGING_SENDER_ID}',
-    appId: '${process.env.FIREBASE_APP_ID}',
-    measurementId: '${process.env.FIREBASE_MEASUREMENT_ID}',
+    apiKey: '${firebaseEnv.apiKey}',
+    authDomain: '${firebaseEnv.authDomain}',
+    projectId: '${firebaseEnv.projectId}',
+    storageBucket: '${firebaseEnv.storageBucket}',
+    messagingSenderId: '${firebaseEnv.messagingSenderId}',
+    appId: '${firebaseEnv.appId}',
+    measurementId: '${firebaseEnv.measurementId}',
   }
 };
 `;
+} else if (fs.existsSync(examplePath)) {
+  envConfigFile = fs.readFileSync(examplePath, "utf8");
+  console.log("set-env: FIREBASE_* vars missing. Generated environment.ts from enviroment.example.ts");
+} else {
+  envConfigFile = `
+export const environment = {
+  production: true,
+  firebaseConfig: {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: "",
+    measurementId: "",
+  }
+};
+`;
+  console.log("set-env: FIREBASE_* vars missing. Generated empty fallback environment.ts");
+}
 
 fs.writeFileSync(targetPath, envConfigFile);
 console.log("Environment variables injected successfully!");

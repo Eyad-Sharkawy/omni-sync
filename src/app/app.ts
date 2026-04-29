@@ -38,6 +38,7 @@ export class App {
   );
 
   constructor() {
+    void this.auth.completeGoogleRedirectIfPresent().catch(() => undefined);
     void this.auth.completeEmailLinkSignInIfPresent(globalThis.location?.href ?? "");
   }
 

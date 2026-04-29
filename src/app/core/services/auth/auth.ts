@@ -7,6 +7,7 @@ import {
   authState,
   Auth as FireAuth,
   AuthError,
+  getRedirectResult,
   GoogleAuthProvider,
   isSignInWithEmailLink,
   sendSignInLinkToEmail,
@@ -134,6 +135,15 @@ export class Auth {
     if (globalThis.history?.replaceState) {
       const cleanUrl = globalThis.location?.origin + globalThis.location?.pathname;
       globalThis.history.replaceState({}, globalThis.document?.title ?? "", cleanUrl);
+    }
+  }
+
+  async completeGoogleRedirectIfPresent(): Promise<void> {
+    try {
+      await getRedirectResult(this.auth);
+    } catch (error) {
+      console.error("Google Redirect Sign In Error", error);
+      throw error;
     }
   }
 

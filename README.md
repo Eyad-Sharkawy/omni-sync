@@ -16,6 +16,22 @@ Omni Sync is an Angular productivity app that combines a Kanban board and a Cale
   - Signed-in users: Firestore (with local cache fallback)
   - Guests: localStorage
 
+## Architecture Overview
+
+```mermaid
+flowchart TD
+  UI[Angular UI: Navbar / Sidebar / Kanban / Calendar] --> Store[KanbanStore]
+  Store --> Auth[Auth Service]
+  Store --> Storage[Storage Service]
+
+  Auth --> FirebaseAuth[Firebase Authentication]
+  Storage --> Firestore[(Firestore kanban/{uid})]
+  Storage --> LocalCache[(localStorage cache)]
+
+  FirebaseAuth --> Rules[Auth + Firestore Rules]
+  Firestore --> Rules
+```
+
 ## Tech Stack
 
 - Angular 21
