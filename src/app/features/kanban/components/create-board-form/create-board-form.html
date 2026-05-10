@@ -1,75 +1,126 @@
-<form
-  [formGroup]="form"
-  (ngSubmit)="onSubmit()"
-  autocomplete="off"
-  class="flex flex-col gap-4 px-6 pt-5 pb-6"
->
-  <div class="flex flex-col gap-1.5">
-    <label for="board-name" class="os-form-label"> Board Name </label>
-    <input
-      formControlName="name"
-      id="board-name"
-      type="text"
-      inputmode="text"
-      enterkeyhint="done"
-      autocomplete="off"
-      placeholder="Enter board name"
-      class="os-form-input"
-      required
-    />
+<div class="flex flex-col px-6 pt-5 pb-6">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" class="flex flex-col gap-4">
+    <div class="flex flex-col gap-1.5">
+      <label for="board-name" class="os-form-label"> Board Name </label>
+      <input
+        formControlName="name"
+        id="board-name"
+        type="text"
+        inputmode="text"
+        enterkeyhint="done"
+        autocomplete="off"
+        placeholder="Enter board name"
+        class="os-form-input"
+        required
+      />
 
-    @if (nameIsInvalid) {
-      <p class="text-danger text-sm">Add a board name</p>
+      @if (nameIsInvalid) {
+        <p class="text-danger text-sm">Add a board name</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="board-start-date" class="os-form-label"> Start Date </label>
+      <input
+        formControlName="startDate"
+        type="date"
+        id="board-start-date"
+        class="os-form-input os-date-input"
+        required
+      />
+
+      @if (startDateIsInvalid) {
+        <p class="text-danger text-sm">Select a valid start date</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label for="board-due-date" class="os-form-label"> Due Date </label>
+      <input
+        formControlName="dueDate"
+        [min]="minDueDate()"
+        type="date"
+        id="board-due-date"
+        class="os-form-input os-date-input"
+        required
+      />
+
+      @if (dueDateIsInvalid) {
+        <p class="text-danger text-sm">Select a valid due date</p>
+      }
+    </div>
+
+    @if (isEditMode) {
+      <hr class="text-border" />
+
+      <div class="flex flex-col gap-2">
+        <p class="os-form-label mb-0">Share with</p>
+        <p class="text-muted text-xs leading-snug">
+          Invite someone by their profile username. They will see this board under “Shared with you”.
+        </p>
+
+        @if (shareFeedback(); as msg) {
+          <p class="text-secondary bg-surface2 border-border rounded-lg border px-3 py-2 text-sm" role="status">
+            {{ msg }}
+          </p>
+        }
+
+        <div class="flex flex-wrap items-center gap-2">
+          <input
+            [formControl]="shareUsername"
+            type="text"
+            placeholder="username"
+            autocomplete="off"
+            class="os-form-input min-w-[140px] flex-1 text-sm"
+            (keydown.enter)="$event.preventDefault(); onAddShare()"
+          />
+          <button
+            type="button"
+            (click)="onAddShare()"
+            class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-4 py-2 text-sm font-medium transition hover:opacity-85"
+          >
+            Share
+          </button>
+        </div>
+
+        @if (memberIdsForEdit().length > 0) {
+          <p class="text-secondary mt-1 text-xs font-semibold tracking-wide">Shared with</p>
+          <ul class="border-border bg-surface2/50 max-h-40 space-y-1.5 overflow-y-auto rounded-lg border p-2">
+            @for (uid of memberIdsForEdit(); track uid) {
+              <li class="text-secondary flex items-center justify-between gap-2 text-sm">
+                <span class="min-w-0 truncate">{{ memberLabel(uid) }}</span>
+                <button
+                  type="button"
+                  title="Remove access"
+                  (click)="onRemoveMember(uid)"
+                  class="text-danger hover:bg-surface3 shrink-0 cursor-pointer rounded px-2 py-1 text-xs transition"
+                >
+                  Remove
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
     }
-  </div>
 
-  <div class="flex flex-col gap-1.5">
-    <label for="board-start-date" class="os-form-label"> Start Date </label>
-    <input
-      formControlName="startDate"
-      type="date"
-      id="board-start-date"
-      class="os-form-input os-date-input"
-      required
-    />
+    <hr class="text-border" />
 
-    @if (startDateIsInvalid) {
-      <p class="text-danger text-sm">Select a valid start date</p>
-    }
-  </div>
+    <div class="flex justify-end gap-2 font-mono text-[12px]">
+      <button
+        type="button"
+        (click)="onModalClosed()"
+        class="border-border text-secondary hover:bg-surface2 hover:text-primary cursor-pointer rounded-lg border bg-transparent px-4.5 py-2 transition focus-within:outline-[var(--color)] focus-visible:outline"
+      >
+        Cancel
+      </button>
 
-  <div class="flex flex-col gap-1.5">
-    <label for="board-due-date" class="os-form-label"> Due Date </label>
-    <input
-      formControlName="dueDate"
-      [min]="minDueDate()"
-      type="date"
-      id="board-due-date"
-      class="os-form-input os-date-input"
-      required
-    />
-
-    @if (dueDateIsInvalid) {
-      <p class="text-danger text-sm">Select a valid due date</p>
-    }
-  </div>
-
-  <hr class="text-border" />
-
-  <div class="flex justify-end gap-2 font-mono text-[12px]">
-    <button
-      type="button"
-      (click)="onModalClosed()"
-      class="border-border text-secondary hover:bg-surface2 hover:text-primary cursor-pointer rounded-lg border bg-transparent px-4.5 py-2 transition focus-within:outline-[var(--color)] focus-visible:outline"
-    >
-      Cancel
-    </button>
-
-    <button
-      type="submit"
-      class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium transition focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
-    >
-      {{ isEditMode ? "Edit board" : "Create board" }}
-    </button>
-  </div>
-</form>
+      <button
+        type="submit"
+        class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium transition focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
+      >
+        {{ isEditMode ? "Save board" : "Create board" }}
+      </button>
+    </div>
+  </form>
+</div>

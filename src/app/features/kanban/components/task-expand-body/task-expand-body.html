@@ -1,0 +1,52 @@
+<div class="flex flex-col gap-4 px-6 pt-1 pb-6">
+  <div class="flex items-center gap-2">
+    <span class="h-2 w-2 shrink-0 rounded-full bg-[var(--priority)]"></span>
+    <span class="text-[0.625rem] tracking-[1px] text-[var(--priority)] capitalize">
+      {{ task().priority }} · priority
+    </span>
+  </div>
+
+  @if (task().description) {
+    <p class="text-secondary text-sm leading-relaxed whitespace-pre-wrap">
+      {{ task().description }}
+    </p>
+  } @else {
+    <p class="text-muted text-sm italic">No description</p>
+  }
+
+  @if (task().tags.length !== 0) {
+    <div>
+      <p class="os-form-label mb-2">Tags</p>
+      <div class="flex flex-wrap gap-1.5">
+        @for (tag of task().tags; track tag.id) {
+          <os-task-tag [color]="tag.color">{{ tag.text }}</os-task-tag>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="font-mono text-sm">
+    <p class="text-muted mb-1 text-xs tracking-wide uppercase">Schedule</p>
+    <p class="text-secondary">
+      <time [attr.datetime]="task().startDate | date: 'yyyy-MM-dd'">
+        {{ task().startDate | date }}
+      </time>
+      <span class="text-muted mx-1.5">→</span>
+      <time [attr.datetime]="task().dueDate | date: 'yyyy-MM-dd'">
+        {{ task().dueDate | date }}
+      </time>
+    </p>
+  </div>
+
+  <hr class="text-border" />
+
+  <div class="flex justify-end font-mono text-[12px]">
+    <button
+      type="button"
+      (click)="onEdit()"
+      class="text-primary cursor-pointer rounded-lg bg-[var(--color)] px-5.5 py-2 font-medium transition focus-within:outline-[var(--color)] hover:opacity-85 focus-visible:outline"
+    >
+      Edit task
+    </button>
+  </div>
+</div>

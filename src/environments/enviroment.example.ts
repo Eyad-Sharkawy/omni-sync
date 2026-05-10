@@ -10,4 +10,6 @@ export const environment = {
     appId: "YOUR_APP_ID",
     measurementId: "YOUR_MEASUREMENT_ID",
   },
+
+  GEMINI_API_KEY: "YOUR_GEMINI_API_KEY",
 };

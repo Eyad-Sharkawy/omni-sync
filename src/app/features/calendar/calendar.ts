@@ -14,6 +14,10 @@ import multiMonthPlugin from "@fullcalendar/multimonth";
 import { KanbanStore } from "../kanban/services/kanban-store";
 import { Board } from "../../core/models/board";
 import { ViewBoardsModal } from "../kanban/components/view-boards-modal/view-boards-modal";
+import { Modal } from "../../shared/components/modal/modal";
+import { AddTaskForm } from "../kanban/components/add-task-form/add-task-form";
+import { TaskExpandBody } from "../kanban/components/task-expand-body/task-expand-body";
+import { OmniSyncColors } from "../../shared/UI/colors";
 
 interface CalendarSortEvent {
   extendedProps?: Record<string, unknown>;
@@ -22,9 +26,21 @@ interface CalendarSortEvent {
 
 type CalendarChangeView = (viewName: string, date?: Date | string) => void;
 
+interface ModalTaskInfo {
+  columnId: string;
+  taskId?: string;
+}
+
 @Component({
   selector: "os-calendar",
-  imports: [CommonModule, FullCalendarModule, ViewBoardsModal],
+  imports: [
+    CommonModule,
+    FullCalendarModule,
+    ViewBoardsModal,
+    Modal,
+    AddTaskForm,
+    TaskExpandBody,
+  ],
   templateUrl: "./calendar.html",
   styleUrl: "./calendar.css",
 })
@@ -43,9 +59,45 @@ export class Calendar {
   private readonly calendarRef = viewChild<FullCalendarComponent>("calendar");
 
   readonly boards = this.kanbanStore.boards;
+  readonly myBoards = computed(() => this.boards().filter((b) => !b.sharedFromOwnerId));
+  readonly sharedBoards = computed(() => this.boards().filter((b) => !!b.sharedFromOwnerId));
   readonly currentBoard = this.kanbanStore.currentBoard;
   readonly viewBoards = signal(false);
   readonly calendarEvents = computed(() => this.buildCalendarEvents());
+
+  readonly taskViewInfo = signal<{ columnId: string; taskId: string } | null>(null);
+  readonly addTaskModalInfo = signal<ModalTaskInfo | null>(null);
+  readonly selectedTaskModal = signal<"addTask" | null>(null);
+  readonly modalColor = signal<OmniSyncColors>("indigo");
+
+  readonly viewTask = computed(() => {
+    const info = this.taskViewInfo();
+    if (!info) {
+      return null;
+    }
+    return this.kanbanStore.tasks().find((t) => t.id === info.taskId) ?? null;
+  });
+
+  readonly viewTaskColumn = computed(() => {
+    const info = this.taskViewInfo();
+    if (!info) {
+      return null;
+    }
+    return this.kanbanStore.getColumnById(info.columnId) ?? null;
+  });
+
+  readonly taskViewModalBadge = computed(() => this.viewTaskColumn()?.header ?? "");
+  readonly taskViewModalColor = computed(() => this.viewTaskColumn()?.color ?? "indigo");
+
+  readonly addTaskModalColumn = computed(() => {
+    const info = this.addTaskModalInfo();
+    if (!info) {
+      return null;
+    }
+    return this.kanbanStore.getColumnById(info.columnId) ?? null;
+  });
+
+  readonly modalBadge = computed(() => this.addTaskModalColumn()?.header ?? "");
 
   constructor() {
     effect(() => {
@@ -84,6 +136,22 @@ export class Calendar {
 
       calendarApi.refetchEvents();
     });
+
+    effect(() => {
+      const info = this.addTaskModalInfo();
+      const column = this.addTaskModalColumn();
+      if (info && column) {
+        this.modalColor.set(column.color);
+      }
+    });
+
+    effect(() => {
+      const info = this.taskViewInfo();
+      const task = this.viewTask();
+      if (info && !task) {
+        this.taskViewInfo.set(null);
+      }
+    });
   }
 
   calendarOptions: CalendarOptions = {
@@ -117,8 +185,17 @@ export class Calendar {
     events: (_info, successCallback) => {
       successCallback(this.calendarEvents());
     },
-    eventClick: () => {
-      void this.router.navigate(["/kanban", this.currentBoard().publicId]);
+    eventClick: (info) => {
+      const taskId = info.event.extendedProps["taskId"] as string | undefined;
+      const columnId = info.event.extendedProps["columnId"] as string | undefined;
+
+      if (
+        taskId &&
+        columnId &&
+        this.kanbanStore.hasTaskInColumn(columnId, taskId)
+      ) {
+        this.taskViewInfo.set({ columnId, taskId });
+      }
     },
   };
 
@@ -187,10 +264,35 @@ export class Calendar {
       end: task.dueDate,
       color: `var(--color-os-${this.kanbanStore.getColumnById(task.columnId)?.color ?? "indigo"})`,
       extendedProps: {
+        taskId: task.id,
+        columnId: task.columnId,
         columnOrder: columnOrderById.get(task.columnId) ?? Calendar.LAST_SORT_ORDER,
         taskOrder: taskOrderById.get(task.id) ?? Calendar.LAST_SORT_ORDER,
       },
     }));
+  }
+
+  closeTaskView(): void {
+    this.taskViewInfo.set(null);
+  }
+
+  onEditFromTaskView(): void {
+    const info = this.taskViewInfo();
+    if (!info) {
+      return;
+    }
+
+    this.taskViewInfo.set(null);
+    this.openEditTaskModal({ columnId: info.columnId, taskId: info.taskId });
+  }
+
+  closeAddTaskModal(): void {
+    this.addTaskModalInfo.set(null);
+    this.selectedTaskModal.set(null);
+  }
+
+  onModalColumnChanged(columnId: string): void {
+    this.addTaskModalInfo.update((value) => (value ? { ...value, columnId } : value));
   }
 
   onViewBoards() {
@@ -201,12 +303,39 @@ export class Calendar {
     this.viewBoards.set(false);
   }
 
+  async onLeaveSharedBoard(boardId: string): Promise<void> {
+    const result = await this.kanbanStore.leaveSharedBoard(boardId);
+    if (result.ok) {
+      this.closeModal();
+    }
+  }
+
+  private openEditTaskModal(taskInfo: ModalTaskInfo): void {
+    const column = this.kanbanStore.getColumnById(taskInfo.columnId);
+
+    if (!column) {
+      return;
+    }
+
+    if (
+      taskInfo.taskId &&
+      !this.kanbanStore.hasTaskInColumn(taskInfo.columnId, taskInfo.taskId)
+    ) {
+      return;
+    }
+
+    this.addTaskModalInfo.set(taskInfo);
+    this.selectedTaskModal.set("addTask");
+  }
+
   onSelectBoard(boardPublicId: string): void {
     const matchedBoard = this.kanbanStore.getBoardByPublicId(boardPublicId);
     if (matchedBoard) {
       this.kanbanStore.setCurrentBoard(matchedBoard.id);
     }
 
+    this.closeTaskView();
+    this.closeAddTaskModal();
     this.closeModal();
   }
 

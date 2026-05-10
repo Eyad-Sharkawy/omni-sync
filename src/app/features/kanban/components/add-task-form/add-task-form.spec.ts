@@ -4,6 +4,7 @@ import { vi } from "vitest";
 
 import { AddTaskForm } from "./add-task-form";
 import { KanbanStore } from "../../services/kanban-store";
+import { Gemini } from "../../../../core/services/gemini/gemini";
 
 describe("AddTaskForm", () => {
   let component: AddTaskForm;
@@ -25,12 +26,15 @@ describe("AddTaskForm", () => {
     dueDate: new Date("2026-04-02"),
   };
   const kanbanStoreMock = {
-    columns: signal([column]),
+    currentColumns: signal([column]),
     tasks: signal([task]),
     getColumnById: vi.fn((columnId: string) => (columnId === column.id ? column : undefined)),
     hasTaskInColumn: vi.fn(() => true),
     updateTask: vi.fn(),
     addTaskToColumn: vi.fn(),
+  };
+  const geminiMock = {
+    generateTaskMetadata: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -42,7 +46,10 @@ describe("AddTaskForm", () => {
 
     await TestBed.configureTestingModule({
       imports: [AddTaskForm],
-      providers: [{ provide: KanbanStore, useValue: kanbanStoreMock }],
+      providers: [
+        { provide: KanbanStore, useValue: kanbanStoreMock },
+        { provide: Gemini, useValue: geminiMock },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AddTaskForm);

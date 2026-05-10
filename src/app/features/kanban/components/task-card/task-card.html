@@ -42,18 +42,28 @@
   </div>
 </div>
 
-<h4 class="mb-2.5 text-sm leading-[1.4] font-semibold">
-  <ng-content select="Message" />
-</h4>
+<div
+  class="hover:bg-surface2/50 -mx-1 -mb-1 cursor-pointer rounded-lg px-1 pb-1 transition"
+  role="button"
+  tabindex="0"
+  (click)="onExpandClick($event)"
+  (keydown)="onExpandKeydown($event)"
+>
+  <h4 class="mb-2.5 text-sm leading-[1.4] font-semibold">
+    <ng-content select="Message" />
+  </h4>
 
-@if (taskTags().length !== 0) {
-  <div class="mb-3 flex flex-wrap gap-1.5">
-    <ng-content select="os-task-tag" />
+  <ng-content select="Description" />
+
+  @if (taskTags().length !== 0) {
+    <div class="mb-3 flex flex-wrap gap-1.5">
+      <ng-content select="os-task-tag" />
+    </div>
+  }
+
+  <div class="flex items-center justify-between">
+    <p class="text-muted font-mono text-sm">
+      <ng-content select="Date" />
+    </p>
   </div>
-}
-
-<div class="flex items-center justify-between">
-  <p class="text-muted font-mono text-sm">
-    <ng-content select="Date" />
-  </p>
 </div>

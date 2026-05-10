@@ -35,6 +35,7 @@ import { OmniSyncColors } from "../../shared/UI/colors";
 import { AddColumnForm } from "./components/add-column-form/add-column-form";
 import { CreateBoardForm } from "./components/create-board-form/create-board-form";
 import { ViewBoardsModal } from "./components/view-boards-modal/view-boards-modal";
+import { TaskExpandBody } from "./components/task-expand-body/task-expand-body";
 
 interface ModalTaskInfo {
   columnId: string;
@@ -59,6 +60,7 @@ type ModalType = "addTask" | "addColumn" | "addBoard";
     AddColumnForm,
     CreateBoardForm,
     ViewBoardsModal,
+    TaskExpandBody,
   ],
   templateUrl: "./kanban.html",
   styleUrl: "./kanban.css",
@@ -86,11 +88,26 @@ export class Kanban {
   readonly showViewBoardModal = signal<boolean>(false);
 
   readonly boards = this.kanbanStore.boards;
+  readonly myBoards = computed(() => this.boards().filter((b) => !b.sharedFromOwnerId));
+  readonly sharedBoards = computed(() => this.boards().filter((b) => !!b.sharedFromOwnerId));
   readonly currentBoard = this.kanbanStore.currentBoard;
+
+  readonly boardModalTitle = computed(() => {
+    this.boards();
+    const id = this.editBoardModalId();
+    if (!id) {
+      return "Create new board";
+    }
+    const b = this.kanbanStore.getBoardById(id);
+    return b?.sharedFromOwnerId ? "Board details" : "Edit board";
+  });
   columns = this.kanbanStore.currentColumns;
   addTaskModalInfo = signal<ModalTaskInfo | null>(null);
   addColumnModalInfo = signal<ModalTaskInfo | null>(null);
   editBoardModalId = signal<string | null>(null);
+  /** Open task read-only expand modal (distinct from add/edit task). */
+  taskViewInfo = signal<{ columnId: string; taskId: string } | null>(null);
+
   modalColumn = computed(() => {
     const modalInfo = this.addTaskModalInfo() ?? this.addColumnModalInfo();
     if (!modalInfo) {
@@ -101,6 +118,26 @@ export class Kanban {
   });
 
   modalBadge = computed(() => this.modalColumn()?.header ?? "");
+
+  viewTaskColumn = computed(() => {
+    const info = this.taskViewInfo();
+    if (!info) {
+      return null;
+    }
+    return this.kanbanStore.getColumnById(info.columnId) ?? null;
+  });
+
+  viewTask = computed(() => {
+    const info = this.taskViewInfo();
+    if (!info) {
+      return null;
+    }
+    return this.kanbanStore.tasks().find((t) => t.id === info.taskId) ?? null;
+  });
+
+  taskViewModalBadge = computed(() => this.viewTaskColumn()?.header ?? "");
+
+  taskViewModalColor = computed(() => this.viewTaskColumn()?.color ?? "indigo");
   modalColor = signal<OmniSyncColors>("indigo");
 
   tasksByColumnId = (columnId: string): Task[] => this.kanbanStore.getTasksByColumnId(columnId);
@@ -131,6 +168,14 @@ export class Kanban {
 
     effect(() => {
       this.modalColor.set(this.modalColumn()?.color ?? "indigo");
+    });
+
+    effect(() => {
+      const info = this.taskViewInfo();
+      const task = this.viewTask();
+      if (info && !task) {
+        this.taskViewInfo.set(null);
+      }
     });
 
     this.destroyRef.onDestroy(() => {
@@ -176,7 +221,7 @@ export class Kanban {
   }
 
   onDeleteBoard(boardId: string): void {
-    if (this.boards().length <= 1) {
+    if (this.myBoards().length <= 1) {
       return;
     }
 
@@ -195,7 +240,28 @@ export class Kanban {
     this.openModal(taskInfo);
   }
 
+  onExpandTask(taskInfo: { columnId: string; taskId: string }): void {
+    if (!this.kanbanStore.hasTaskInColumn(taskInfo.columnId, taskInfo.taskId)) {
+      return;
+    }
+    this.taskViewInfo.set(taskInfo);
+  }
+
+  closeTaskView(): void {
+    this.taskViewInfo.set(null);
+  }
+
+  onEditFromTaskView(): void {
+    const info = this.taskViewInfo();
+    if (!info) {
+      return;
+    }
+    this.taskViewInfo.set(null);
+    this.openModal({ columnId: info.columnId, taskId: info.taskId });
+  }
+
   closeModal() {
+    this.taskViewInfo.set(null);
     this.addTaskModalInfo.set(null);
     this.addColumnModalInfo.set(null);
     this.editBoardModalId.set(null);
@@ -315,6 +381,13 @@ export class Kanban {
 
   onViewBoards() {
     this.showViewBoardModal.update((prev) => !prev);
+  }
+
+  async onLeaveSharedBoard(boardId: string): Promise<void> {
+    const result = await this.kanbanStore.leaveSharedBoard(boardId);
+    if (result.ok) {
+      this.closeModal();
+    }
   }
 
   private openModal(taskInfo?: ModalTaskInfo) {

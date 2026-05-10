@@ -1,4 +1,5 @@
-import { computed, effect, inject, Injectable, signal } from "@angular/core";
+import { computed, effect, inject, Injectable, signal, untracked } from "@angular/core";
+import { doc, Firestore, onSnapshot } from "@angular/fire/firestore";
 
 import { Board } from "../../../core/models/board";
 import { Storage } from "../../../core/services/storage/storage";
@@ -8,11 +9,13 @@ import { OmniSyncColors } from "../../../shared/UI/colors";
 import { LOCAL_STORAGE } from "../../../core/tokens/local-storage";
 import { nanoid } from "nanoid";
 import { Auth } from "../../../core/services/auth/auth";
+import { UserProfileService } from "../../../core/services/user-profile/user-profile";
 
 type KanbanState = ReturnType<Storage["getKanban"]>;
 
 export interface CreateTaskInput {
   title: string;
+  description?: string;
   priority: Task["priority"];
   startDate: Date;
   dueDate: Date;
@@ -41,18 +44,28 @@ export interface UpdateBoardInput {
   dueDate?: Date;
 }
 
+const BOARD_WORKSPACES_COLLECTION = "boardWorkspaces";
+
 @Injectable()
 export class KanbanStore {
   private readonly storage = inject(Storage);
+  private readonly firestore = inject(Firestore);
   private readonly localStorage = inject(LOCAL_STORAGE);
   private readonly auth = inject(Auth);
+  private readonly userProfile = inject(UserProfileService);
   private readonly CURRENT_BOARD_KEY = "omni-sync.currentBoardId";
   private readonly GUEST_SCOPE = "guest";
 
   private readonly _kanban = signal<KanbanState>(this.storage.getKanban());
   private readonly isHydrating = signal(false);
+  private readonly isApplyingRemoteSnapshot = signal(false);
+  private readonly pendingWorkspaceWriteCounts = new Map<string, number>();
+  private readonly lastAppliedWorkspaceUpdatedAtMs = new Map<string, number>();
+  private readonly lastRemoteWorkspaceFingerprints = new Map<string, string>();
   private readonly FIRESTORE_SYNC_DEBOUNCE_MS = 800;
+  private readonly WORKSPACE_SYNC_DEBOUNCE_MS = 300;
   private firestoreSyncTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private workspaceSyncTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   readonly boards = computed(() => this._kanban().boards);
   readonly columns = computed(() => this._kanban().columns);
@@ -116,6 +129,9 @@ export class KanbanStore {
       if (this.isHydrating()) {
         return;
       }
+      if (this.isApplyingRemoteSnapshot()) {
+        return;
+      }
 
       const nextSerialized = JSON.stringify(kanban);
 
@@ -126,6 +142,21 @@ export class KanbanStore {
       lastSerialized = nextSerialized;
 
       if (currentUser) {
+        const collaborativeBoard = this.getCurrentBoardInState(kanban);
+        if (collaborativeBoard) {
+          const currentFingerprint = this.workspaceFingerprintFromState(kanban, collaborativeBoard.id);
+          const lastRemoteFingerprint = this.lastRemoteWorkspaceFingerprints.get(collaborativeBoard.id);
+          if (currentFingerprint && currentFingerprint === lastRemoteFingerprint) {
+            return;
+          }
+          if (this.firestoreSyncTimeoutId) {
+            clearTimeout(this.firestoreSyncTimeoutId);
+            this.firestoreSyncTimeoutId = null;
+          }
+          const workspaceOwnerUid = collaborativeBoard.sharedFromOwnerId ?? currentUser.uid;
+          this.scheduleWorkspaceSync(workspaceOwnerUid, collaborativeBoard.id, kanban);
+          return;
+        }
         this.scheduleFirestoreSync(currentUser.uid, kanban);
         return;
       }
@@ -154,6 +185,75 @@ export class KanbanStore {
       }
 
       this.localStorage.setItem(key, selectedId);
+    });
+
+    /** Live-merge shared workspace docs so all collaborators’ tasks/columns stay in sync. */
+    effect((onCleanup) => {
+      const user = this.auth.currentUser();
+      const boardId = this._currentBoardId();
+      if (!user) {
+        return;
+      }
+      if (!boardId) {
+        return;
+      }
+
+      // Read board meta untracked so local task/column mutations do not recreate the listener
+      // and immediately overwrite optimistic edits with the last remote snapshot.
+      const board = untracked(() => this._kanban().boards.find((b) => b.id === boardId));
+      if (!board) {
+        return;
+      }
+      const collaborative =
+        Boolean(board.sharedFromOwnerId) || (board.memberIds?.length ?? 0) > 0;
+      if (!collaborative) {
+        return;
+      }
+
+      const ref = doc(this.firestore, BOARD_WORKSPACES_COLLECTION, boardId);
+      const unsub = onSnapshot(
+        ref,
+        (snap) => {
+          if (!snap.exists()) {
+            return;
+          }
+          if (this.isHydrating()) {
+            return;
+          }
+          if (this.isWorkspaceWritePending(boardId)) {
+            return;
+          }
+          const data = snap.data() ?? {};
+          const updatedAt = this.parseUpdatedAtMs(data["updatedAt"]);
+          const lastAppliedAt = this.lastAppliedWorkspaceUpdatedAtMs.get(boardId) ?? 0;
+          if (Number.isFinite(updatedAt)) {
+            if (updatedAt < lastAppliedAt) {
+              return;
+            }
+            this.lastAppliedWorkspaceUpdatedAtMs.set(boardId, updatedAt);
+          }
+          const ownerId = typeof data["ownerId"] === "string" ? (data["ownerId"] as string) : "";
+          const existingBoard = this._kanban().boards.find((b) => b.id === boardId);
+          const sharedFromOwnerId =
+            ownerId && ownerId !== user.uid ? ownerId : undefined;
+
+          const parsed = this.storage.parseBoardWorkspaceDocument(data, {
+            existingBoard: existingBoard,
+            sharedFromOwnerId,
+          });
+          if (!parsed) {
+            return;
+          }
+          const remoteFingerprint = this.workspaceFingerprintFromParsed(parsed, boardId);
+          this.lastRemoteWorkspaceFingerprints.set(boardId, remoteFingerprint);
+          this.mergeRemoteWorkspaceSlice(boardId, parsed);
+        },
+        (err) => {
+          console.warn("[KanbanStore] board workspace listener:", err);
+        },
+      );
+
+      onCleanup(() => unsub());
     });
   }
 
@@ -206,6 +306,75 @@ export class KanbanStore {
     return `${this.CURRENT_BOARD_KEY}.${userId}`;
   }
 
+  private getCurrentBoardInState(kanban: KanbanState): Board | null {
+    const selectedId = this._currentBoardId();
+    const board = kanban.boards.find((b) => b.id === selectedId) ?? kanban.boards[0];
+    if (!board) {
+      return null;
+    }
+    return Boolean(board.sharedFromOwnerId) || (board.memberIds?.length ?? 0) > 0 ? board : null;
+  }
+
+  private markWorkspaceWriteStart(boardId: string): void {
+    const prev = this.pendingWorkspaceWriteCounts.get(boardId) ?? 0;
+    this.pendingWorkspaceWriteCounts.set(boardId, prev + 1);
+  }
+
+  private markWorkspaceWriteEnd(boardId: string): void {
+    const prev = this.pendingWorkspaceWriteCounts.get(boardId) ?? 0;
+    if (prev <= 1) {
+      this.pendingWorkspaceWriteCounts.delete(boardId);
+      return;
+    }
+    this.pendingWorkspaceWriteCounts.set(boardId, prev - 1);
+  }
+
+  private isWorkspaceWritePending(boardId: string): boolean {
+    return (this.pendingWorkspaceWriteCounts.get(boardId) ?? 0) > 0;
+  }
+
+  private parseUpdatedAtMs(raw: unknown): number {
+    if (typeof raw === "string") {
+      return Date.parse(raw);
+    }
+    if (typeof raw === "number") {
+      return raw;
+    }
+    if (raw && typeof raw === "object" && "toDate" in raw && typeof (raw as { toDate: unknown }).toDate === "function") {
+      return (raw as { toDate: () => Date }).toDate().getTime();
+    }
+    return NaN;
+  }
+
+  /** Replace one board’s columns/tasks from a remote `boardWorkspaces` snapshot. */
+  private mergeRemoteWorkspaceSlice(
+    boardId: string,
+    parsed: { board: Board; columns: Column[]; tasks: Task[] },
+  ): void {
+    this.isApplyingRemoteSnapshot.set(true);
+    try {
+      this._kanban.update((state) => {
+        const boardOut: Board = { ...parsed.board, id: boardId };
+
+        const oldColumnIds = new Set(
+          state.columns.filter((c) => c.boardId === boardId).map((c) => c.id),
+        );
+
+        return {
+          ...state,
+          boards: state.boards.map((b) => (b.id === boardId ? boardOut : b)),
+          columns: [...state.columns.filter((c) => c.boardId !== boardId), ...parsed.columns],
+          tasks: [
+            ...state.tasks.filter((t) => !oldColumnIds.has(t.columnId)),
+            ...parsed.tasks,
+          ],
+        };
+      });
+    } finally {
+      this.isApplyingRemoteSnapshot.set(false);
+    }
+  }
+
   private scheduleFirestoreSync(userId: string, kanban: KanbanState): void {
     if (this.firestoreSyncTimeoutId) {
       clearTimeout(this.firestoreSyncTimeoutId);
@@ -221,6 +390,99 @@ export class KanbanStore {
       this.firestoreSyncTimeoutId = null;
       void this.storage.setKanbanForUser(userId, snapshot.boards, snapshot.columns, snapshot.tasks);
     }, this.FIRESTORE_SYNC_DEBOUNCE_MS);
+  }
+
+  private scheduleWorkspaceSync(ownerUid: string, boardId: string, kanban: KanbanState): void {
+    if (this.workspaceSyncTimeoutId) {
+      clearTimeout(this.workspaceSyncTimeoutId);
+    }
+
+    const snapshot: KanbanState = {
+      boards: [...kanban.boards],
+      columns: [...kanban.columns],
+      tasks: [...kanban.tasks],
+    };
+
+    this.workspaceSyncTimeoutId = setTimeout(() => {
+      this.workspaceSyncTimeoutId = null;
+      const board = snapshot.boards.find((b) => b.id === boardId);
+      if (!board) {
+        return;
+      }
+
+      this.markWorkspaceWriteStart(boardId);
+      void this.storage
+        .ensureBoardWorkspace(ownerUid, board, snapshot.columns, snapshot.tasks)
+        .finally(() => this.markWorkspaceWriteEnd(boardId));
+    }, this.WORKSPACE_SYNC_DEBOUNCE_MS);
+  }
+
+  private workspaceFingerprintFromState(kanban: KanbanState, boardId: string): string {
+    const board = kanban.boards.find((b) => b.id === boardId);
+    if (!board) {
+      return "";
+    }
+    const columns = kanban.columns.filter((c) => c.boardId === boardId);
+    const columnIds = new Set(columns.map((c) => c.id));
+    const tasks = kanban.tasks.filter((t) => columnIds.has(t.columnId));
+    return JSON.stringify({
+      board: {
+        id: board.id,
+        name: board.name,
+        columnsIds: board.columnsIds,
+        startDate: board.startDate?.toISOString?.() ?? board.startDate,
+        dueDate: board.dueDate?.toISOString?.() ?? board.dueDate,
+      },
+      columns: columns.map((c) => ({
+        id: c.id,
+        boardId: c.boardId,
+        header: c.header,
+        color: c.color,
+        tasksIds: c.tasksIds,
+      })),
+      tasks: tasks.map((t) => ({
+        id: t.id,
+        columnId: t.columnId,
+        title: t.title,
+        description: t.description,
+        priority: t.priority,
+        tags: t.tags,
+        startDate: t.startDate?.toISOString?.() ?? t.startDate,
+        dueDate: t.dueDate?.toISOString?.() ?? t.dueDate,
+      })),
+    });
+  }
+
+  private workspaceFingerprintFromParsed(
+    parsed: { board: Board; columns: Column[]; tasks: Task[] },
+    boardId: string,
+  ): string {
+    return JSON.stringify({
+      board: {
+        id: boardId,
+        name: parsed.board.name,
+        columnsIds: parsed.board.columnsIds,
+        startDate: parsed.board.startDate?.toISOString?.() ?? parsed.board.startDate,
+        dueDate: parsed.board.dueDate?.toISOString?.() ?? parsed.board.dueDate,
+      },
+      columns: parsed.columns.map((c) => ({
+        id: c.id,
+        boardId: c.boardId,
+        header: c.header,
+        color: c.color,
+        tasksIds: c.tasksIds,
+      })),
+      tasks: parsed.tasks.map((t) => ({
+        id: t.id,
+        columnId: t.columnId,
+        title: t.title,
+        description: t.description,
+        priority: t.priority,
+        tags: t.tags,
+        startDate: t.startDate?.toISOString?.() ?? t.startDate,
+        dueDate: t.dueDate?.toISOString?.() ?? t.dueDate,
+      })),
+    });
   }
 
   getColumnById(columnId: string): Column | undefined {
@@ -284,6 +546,7 @@ export class KanbanStore {
     const task: Task = {
       id: taskId,
       title: taskInput.title,
+      description: taskInput.description,
       priority: taskInput.priority,
       columnId: columnId,
       tags: taskInput.tags ?? [],
@@ -338,15 +601,12 @@ export class KanbanStore {
       }
 
       const sourceIds = [...sourceColumn.tasksIds];
-
-      const safeFromIndex = Math.max(0, Math.min(fromIndex, sourceIds.length - 1));
-      const movedTaskId = sourceIds[safeFromIndex];
-
-      if (!movedTaskId || movedTaskId !== taskId) {
+      const taskIndexInSource = sourceIds.indexOf(taskId);
+      if (taskIndexInSource < 0) {
         return state;
       }
 
-      sourceIds.splice(safeFromIndex, 1);
+      sourceIds.splice(taskIndexInSource, 1);
       if (fromColumnId === toColumnId) {
         const safeToIndex = Math.max(0, Math.min(toIndex, sourceIds.length));
         sourceIds.splice(safeToIndex, 0, taskId);
@@ -447,6 +707,13 @@ export class KanbanStore {
   }
 
   removeBoard(boardId: string): void {
+    const board = this.getBoardById(boardId);
+    if (board?.sharedFromOwnerId) {
+      return;
+    }
+
+    void this.storage.deleteBoardWorkspace(boardId);
+
     this.updateKanban((state) => {
       const removedColumnIds = new Set(
         state.columns.filter((column) => column.boardId === boardId).map((column) => column.id),
@@ -459,6 +726,134 @@ export class KanbanStore {
         tasks: state.tasks.filter((task) => !removedColumnIds.has(task.columnId)),
       };
     });
+  }
+
+  /**
+   * Collaborator stops seeing a board shared with them (removes self from workspace `memberIds`).
+   */
+  async leaveSharedBoard(
+    boardId: string,
+  ): Promise<{ ok: true } | { ok: false; message: string }> {
+    const user = this.auth.currentUser();
+    if (!user) {
+      return { ok: false, message: "Sign in to leave a shared board." };
+    }
+
+    const board = this.getBoardById(boardId);
+    if (!board?.sharedFromOwnerId) {
+      return { ok: false, message: "That board is not shared with you." };
+    }
+
+    try {
+      await this.storage.removeSelfFromBoardWorkspace(boardId, user.uid);
+    } catch (error) {
+      console.warn("[KanbanStore] leaveSharedBoard Firestore update failed.", error);
+      return { ok: false, message: "Could not leave the board. Try again." };
+    }
+
+    const wasCurrent = this._currentBoardId() === boardId;
+
+    this.updateKanban((state) => {
+      const removedColumnIds = new Set(
+        state.columns.filter((column) => column.boardId === boardId).map((column) => column.id),
+      );
+
+      return {
+        ...state,
+        boards: state.boards.filter((b) => b.id !== boardId),
+        columns: state.columns.filter((column) => column.boardId !== boardId),
+        tasks: state.tasks.filter((task) => !removedColumnIds.has(task.columnId)),
+      };
+    });
+
+    if (wasCurrent) {
+      const nextId = this.boards()[0]?.id ?? "";
+      this._currentBoardId.set(nextId);
+    }
+
+    return { ok: true };
+  }
+
+  /**
+   * Owner shares a personal board with another user (resolved by unique username).
+   */
+  async shareBoardWithUsername(
+    boardId: string,
+    username: string,
+  ): Promise<{ ok: true } | { ok: false; message: string }> {
+    const current = this.auth.currentUser();
+    if (!current) {
+      return { ok: false, message: "Sign in to share boards." };
+    }
+
+    const targetUid = await this.userProfile.getUidForUsername(username);
+    if (!targetUid) {
+      return { ok: false, message: "No user found with that username." };
+    }
+
+    if (targetUid === current.uid) {
+      return { ok: false, message: "You cannot share a board with yourself." };
+    }
+
+    const board = this.getBoardById(boardId);
+    if (!board) {
+      return { ok: false, message: "Board not found." };
+    }
+
+    const nextMembers = [...(board.memberIds ?? [])];
+    if (nextMembers.includes(targetUid)) {
+      return { ok: false, message: "This board is already shared with that user." };
+    }
+
+    nextMembers.push(targetUid);
+    this.patchBoardById(boardId, { memberIds: nextMembers });
+
+    // Ensure shared workspace exists immediately (don't rely only on debounced sync).
+    const updatedBoard = this.getBoardById(boardId);
+    if (!updatedBoard) {
+      return { ok: false, message: "Board not found after share update." };
+    }
+    try {
+      await this.storage.ensureBoardWorkspace(
+        current.uid,
+        updatedBoard,
+        this.columns(),
+        this.tasks(),
+      );
+    } catch (error) {
+      console.warn("[KanbanStore] shareBoardWithUsername workspace write failed.", error);
+      return { ok: false, message: "Share saved locally, but Firestore rejected workspace write." };
+    }
+
+    return { ok: true };
+  }
+
+  /**
+   * Owner removes a collaborator from a personal board.
+   */
+  removeBoardMember(
+    boardId: string,
+    memberUid: string,
+  ): { ok: true } | { ok: false; message: string } {
+    const current = this.auth.currentUser();
+    if (!current) {
+      return { ok: false, message: "Sign in to manage sharing." };
+    }
+
+    const board = this.getBoardById(boardId);
+    if (!board) {
+      return { ok: false, message: "Board not found." };
+    }
+
+    const prev = board.memberIds ?? [];
+    if (!prev.includes(memberUid)) {
+      return { ok: false, message: "That user is not on this board." };
+    }
+
+    this.patchBoardById(boardId, {
+      memberIds: prev.filter((id) => id !== memberUid),
+    });
+    return { ok: true };
   }
 
   moveBoard(fromIndex: number, toIndex: number): void {

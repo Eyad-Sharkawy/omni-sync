@@ -7,11 +7,9 @@ import {
   authState,
   Auth as FireAuth,
   GoogleAuthProvider,
-  isSignInWithEmailLink,
   sendSignInLinkToEmail,
   sendEmailVerification,
   sendPasswordResetEmail,
-  signInWithEmailLink,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -48,7 +46,12 @@ export class Auth {
 
   async loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(this.auth, provider);
+
+    try {
+      await signInWithPopup(this.auth, provider);
+    } catch (error) {
+      console.error("Login with google failed:", error);
+    }
   }
 
   async logout() {
@@ -103,39 +106,6 @@ export class Auth {
       console.error("Email Link Send Error", error);
       throw error;
     }
-  }
-
-  async completeEmailLinkSignInIfPresent(currentUrl: string): Promise<void> {
-    if (!isSignInWithEmailLink(this.auth, currentUrl)) {
-      return;
-    }
-
-    const savedEmail = globalThis.localStorage?.getItem(Auth.EMAIL_LINK_STORAGE_KEY);
-    if (!savedEmail) {
-      throw { code: "auth/missing-email-for-link-signin" };
-    }
-
-    await signInWithEmailLink(this.auth, savedEmail, currentUrl);
-    globalThis.localStorage?.removeItem(Auth.EMAIL_LINK_STORAGE_KEY);
-
-    if (globalThis.history?.replaceState) {
-      const cleanUrl = globalThis.location?.origin + globalThis.location?.pathname;
-      globalThis.history.replaceState({}, globalThis.document?.title ?? "", cleanUrl);
-    }
-  }
-
-  getRuntimeFirebaseConfigSummary(): {
-    projectId?: string;
-    authDomain?: string;
-    apiKeyMasked?: string;
-  } {
-    const options = this.auth.app.options;
-    const apiKey = options.apiKey ?? "";
-    return {
-      projectId: options.projectId,
-      authDomain: options.authDomain,
-      apiKeyMasked: apiKey.length > 8 ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)}` : apiKey,
-    };
   }
 
   private getActionCodeSettings(): ActionCodeSettings | undefined {

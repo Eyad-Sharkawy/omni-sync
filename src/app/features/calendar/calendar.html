@@ -17,14 +17,46 @@
   <full-calendar #calendar class="min-h-0 flex-1" [options]="calendarOptions" />
 </main>
 
+@if (viewTask(); as expandedTask) {
+  <os-modal
+    [title]="expandedTask.title"
+    [badge]="taskViewModalBadge()"
+    [color]="taskViewModalColor()"
+    (closed)="closeTaskView()"
+  >
+    <os-task-expand-body [task]="expandedTask" (edit)="onEditFromTaskView()" />
+  </os-modal>
+}
+
+@switch (selectedTaskModal()) {
+  @case ("addTask") {
+    @if (addTaskModalInfo(); as taskModalInfo) {
+      <os-modal
+        [title]="taskModalInfo.taskId ? 'Edit task' : 'Add new task'"
+        [badge]="modalBadge()"
+        [color]="modalColor()"
+        (closed)="closeAddTaskModal()"
+      >
+        <os-add-task-form
+          [initialInfo]="taskModalInfo"
+          (selectedColumnChanged)="onModalColumnChanged($event)"
+          (closed)="closeAddTaskModal()"
+        />
+      </os-modal>
+    }
+  }
+}
+
 @if (viewBoards()) {
   <os-view-boards-modal
-    [boards]="boards()"
+    [myBoards]="myBoards()"
+    [sharedBoards]="sharedBoards()"
     [currentBoard]="currentBoard()"
     [readonlyMode]="true"
     boardRoutePrefix="calendar"
     (closed)="closeModal()"
     (dropBoard)="onDropBoard($event)"
+    (leaveSharedBoard)="onLeaveSharedBoard($event)"
     (selectBoard)="onSelectBoard($event)"
   />
 }

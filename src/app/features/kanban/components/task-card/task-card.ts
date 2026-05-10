@@ -19,6 +19,7 @@ export class TaskCard {
   taskPriority = input.required<Priority>();
   edit = output();
   delete = output();
+  expand = output();
   taskTags = contentChildren(TaskTag);
 
   onEdit() {
@@ -27,5 +28,21 @@ export class TaskCard {
 
   onDelete() {
     this.delete.emit();
+  }
+
+  onExpandClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button")) {
+      return;
+    }
+    this.expand.emit();
+  }
+
+  onExpandKeydown(event: KeyboardEvent): void {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    this.expand.emit();
   }
 }

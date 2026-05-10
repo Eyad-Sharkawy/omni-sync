@@ -73,6 +73,7 @@
         @for (task of tasksByColumnId(column.id); track task.id) {
           <os-task-card
             [taskPriority]="task.priority"
+            (expand)="onExpandTask({ columnId: column.id, taskId: task.id })"
             (edit)="onEditTask({ columnId: column.id, taskId: task.id })"
             (delete)="onDeleteTask(task.id)"
             cdkDrag
@@ -84,6 +85,12 @@
             <ng-container ngProjectAs="Message">
               {{ task.title }}
             </ng-container>
+
+            @if (task.description) {
+              <p ngProjectAs="Description" class="text-secondary mb-2.5 text-xs leading-[1.4]">
+                {{ task.description }}
+              </p>
+            }
 
             @for (tag of task.tags; track tag.id) {
               <os-task-tag [color]="tag.color">
@@ -115,6 +122,17 @@
   </div>
 </main>
 
+@if (viewTask(); as expandedTask) {
+  <os-modal
+    [title]="expandedTask.title"
+    [badge]="taskViewModalBadge()"
+    [color]="taskViewModalColor()"
+    (closed)="closeTaskView()"
+  >
+    <os-task-expand-body [task]="expandedTask" (edit)="onEditFromTaskView()" />
+  </os-modal>
+}
+
 @switch (selectedModal()) {
   @case ("addTask") {
     <os-modal
@@ -145,7 +163,7 @@
   }
   @case ("addBoard") {
     <os-modal
-      [title]="editBoardModalId() ? 'Edit board' : 'Create new board'"
+      [title]="boardModalTitle()"
       color="indigo"
       (closed)="closeModal()"
     >
@@ -160,7 +178,8 @@
 
 @if (showViewBoardModal()) {
   <os-view-boards-modal
-    [boards]="boards()"
+    [myBoards]="myBoards()"
+    [sharedBoards]="sharedBoards()"
     [currentBoard]="currentBoard()"
     boardRoutePrefix="kanban"
     (closed)="closeModal()"
@@ -168,6 +187,7 @@
     (dropBoard)="onDropBoard($event)"
     (deleteBoard)="onDeleteBoard($event)"
     (editBoard)="onEditBoard($event)"
+    (leaveSharedBoard)="onLeaveSharedBoard($event)"
     (selectBoard)="closeModal()"
   />
 }

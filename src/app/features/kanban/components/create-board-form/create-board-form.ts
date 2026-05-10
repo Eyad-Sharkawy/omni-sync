@@ -1,8 +1,19 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+} from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 
 import { KanbanStore } from "../../services/kanban-store";
+import { UserProfileService } from "../../../../core/services/user-profile/user-profile";
 
 @Component({
   selector: "os-create-board-form",
@@ -13,6 +24,7 @@ import { KanbanStore } from "../../services/kanban-store";
 })
 export class CreateBoardForm {
   private readonly kanbanStore = inject(KanbanStore);
+  private readonly userProfile = inject(UserProfileService);
 
   readonly selectedBoardId = input<string | null>(null);
   readonly closed = output<void>();
@@ -30,8 +42,25 @@ export class CreateBoardForm {
     }),
   });
 
+  protected readonly shareUsername = new FormControl("");
+
   readonly minDueDate = toSignal(this.form.controls.startDate.valueChanges, {
     initialValue: new Date().toISOString().split("T")[0],
+  });
+
+  readonly shareFeedback = signal<string | null>(null);
+
+  private readonly memberLabels = signal(new Map<string, string>());
+
+  /** Reactive list of collaborator UIDs for the board being edited. */
+  readonly memberIdsForEdit = computed(() => {
+    this.kanbanStore.boards();
+    const id = this.selectedBoardId();
+    if (!id) {
+      return [] as string[];
+    }
+    const ids = this.kanbanStore.getBoardById(id)?.memberIds ?? [];
+    return [...ids];
   });
 
   get isEditMode(): boolean {
@@ -56,6 +85,7 @@ export class CreateBoardForm {
   constructor() {
     effect(() => {
       const boardId = this.selectedBoardId();
+      this.kanbanStore.boards();
 
       if (!boardId) {
         this.form.reset({
@@ -63,8 +93,10 @@ export class CreateBoardForm {
           startDate: new Date().toISOString().split("T")[0],
           dueDate: "",
         });
+        this.form.enable({ emitEvent: false });
         this.form.markAsPristine();
         this.form.markAsUntouched();
+        void this.refreshMemberLabels([]);
         return;
       }
 
@@ -78,9 +110,45 @@ export class CreateBoardForm {
         startDate: board.startDate.toISOString().split("T")[0],
         dueDate: board.dueDate.toISOString().split("T")[0],
       });
+      this.form.enable({ emitEvent: false });
       this.form.markAsPristine();
       this.form.markAsUntouched();
+
+      void this.refreshMemberLabels(board.memberIds ?? []);
     });
+  }
+
+  memberLabel(uid: string): string {
+    return this.memberLabels().get(uid) ?? "…";
+  }
+
+  async onAddShare(): Promise<void> {
+    const boardId = this.selectedBoardId();
+    const raw = this.shareUsername.value?.trim() ?? "";
+    if (!boardId || !raw) {
+      return;
+    }
+
+    const result = await this.kanbanStore.shareBoardWithUsername(boardId, raw);
+    if (result.ok) {
+      this.setShareFeedback(`Shared with @${raw.toLowerCase()}.`);
+      this.shareUsername.setValue("");
+    } else {
+      this.setShareFeedback(result.message);
+    }
+  }
+
+  onRemoveMember(uid: string): void {
+    const boardId = this.selectedBoardId();
+    if (!boardId) {
+      return;
+    }
+    const result = this.kanbanStore.removeBoardMember(boardId, uid);
+    if (result.ok) {
+      this.setShareFeedback("Removed from board.");
+    } else {
+      this.setShareFeedback(result.message);
+    }
   }
 
   onSubmit(): void {
@@ -135,5 +203,40 @@ export class CreateBoardForm {
 
   onModalClosed(): void {
     this.closed.emit();
+  }
+
+  private setShareFeedback(message: string): void {
+    this.shareFeedback.set(message);
+    globalThis.setTimeout(() => this.shareFeedback.set(null), 5000);
+  }
+
+  private async refreshMemberLabels(uids: string[]): Promise<void> {
+    if (uids.length === 0) {
+      this.memberLabels.set(new Map());
+      return;
+    }
+
+    const next = new Map(untracked(() => this.memberLabels()));
+
+    for (const uid of uids) {
+      if (next.has(uid)) {
+        continue;
+      }
+      const p = await this.userProfile.getPublicProfile(uid);
+      const handle = p?.username?.trim() ? `@${p.username}` : `User ${uid.slice(0, 8)}`;
+      const full =
+        p?.firstName?.trim() || p?.lastName?.trim()
+          ? `${handle} · ${p?.firstName ?? ""} ${p?.lastName ?? ""}`.trim()
+          : handle;
+      next.set(uid, full);
+    }
+
+    for (const k of [...next.keys()]) {
+      if (!uids.includes(k)) {
+        next.delete(k);
+      }
+    }
+
+    this.memberLabels.set(next);
   }
 }
