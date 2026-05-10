@@ -19,6 +19,30 @@ import { Auth } from "../../../../core/services/auth/auth";
   styleUrl: "./login-popup.css",
 })
 export class LoginPopup {
+  /** Appended when sign-in might be blocked by extensions (shown only for selected error codes). */
+  private static readonly AD_BLOCKER_HINT =
+    " Ad blockers (e.g. AdGuard) often interfere—allow this site or try Incognito/private mode.";
+
+  private static readonly NO_ADBLOCK_HINT_CODES = new Set([
+    "auth/email-already-in-use",
+    "auth/invalid-email",
+    "auth/invalid-credential",
+    "auth/user-not-found",
+    "auth/wrong-password",
+    "auth/email-not-verified",
+    "auth/weak-password",
+    "auth/missing-email",
+    "auth/too-many-requests",
+    "auth/quota-exceeded",
+    "auth/missing-email-for-link-signin",
+    "auth/user-disabled",
+    "auth/invalid-login-credentials",
+    "auth/redirect-started",
+    "auth/operation-not-allowed",
+    "permission-denied",
+    "unauthenticated",
+  ]);
+
   private static readonly EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   private static readonly PASSWORD_PATTERN =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
@@ -267,6 +291,14 @@ export class LoginPopup {
 
   private resolveAuthError(error: unknown): string {
     const errorCode = this.extractAuthErrorCode(error);
+    const base = this.resolveAuthErrorMessage(errorCode);
+    if (LoginPopup.NO_ADBLOCK_HINT_CODES.has(errorCode ?? "")) {
+      return base;
+    }
+    return base + LoginPopup.AD_BLOCKER_HINT;
+  }
+
+  private resolveAuthErrorMessage(errorCode: string | null): string {
     if (!errorCode) {
       return "Authentication failed. Please try again.";
     }
@@ -308,14 +340,14 @@ export class LoginPopup {
         return "Continue URL is invalid or not authorized in Firebase Authentication settings.";
       case "auth/argument-error":
         return (
-          "Google couldn’t start redirect sign-in in this browser (often Chrome tracking prevention or extensions). " +
-          "If it keeps happening, allow popups for this site or relax blocking for localhost/your Vercel URL."
+          "Google couldn’t start sign-in in this browser (tracking prevention, extensions, or blocked storage). " +
+          "Allow popups for this site and relax blocking for this domain."
         );
       case "auth/google-sign-in-unavailable":
-        return (
-          "This browser blocked both redirect and popup Google sign-in. Turn off strict tracking or ad blocking " +
-          "for this site, allow popups, or try another browser."
-        );
+        return "This browser blocked both redirect and popup Google sign-in.";
+      case "auth/popup-blocked":
+      case "auth/cancelled-popup-request":
+        return "Google sign-in window was blocked or closed before finishing.";
       case "permission-denied":
         return "You're signed in, but your account doesn't have permission to access some data yet.";
       case "unauthenticated":

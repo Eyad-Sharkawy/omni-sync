@@ -47,22 +47,13 @@
           <span class="transition">Collapse</span>
         }
       </button>
-    } @else {
-      @if (auth.currentUser()) {
-        <button
-          class="text-primary bg-os-indigo cursor-pointer rounded-lg px-7 py-3.5 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
-          (click)="auth.logout()"
-        >
-          Sign Out
-        </button>
-      } @else {
-        <button
-          class="text-primary bg-os-indigo cursor-pointer rounded-lg px-6 py-3 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
-          (click)="openLoginPopup()"
-        >
-          Sign in
-        </button>
-      }
+    } @else if (!auth.currentUser()) {
+      <button
+        class="text-primary bg-os-indigo cursor-pointer rounded-lg px-6 py-3 font-mono text-sm font-medium tracking-[0.3px] transition hover:opacity-85"
+        (click)="openLoginPopup()"
+      >
+        Sign in
+      </button>
     }
   </footer>
 </aside>
