@@ -6,7 +6,19 @@ import { injectSpeedInsights } from "@vercel/speed-insights";
 
 import { App } from "./app/app";
 
-bootstrapApplication(App, appConfig).catch((err) => console.error(err));
+function scheduleIdle(fn: () => void): void {
+  if (typeof globalThis.requestIdleCallback === "function") {
+    globalThis.requestIdleCallback(fn, { timeout: 4000 });
+    return;
+  }
+  globalThis.setTimeout(fn, 1);
+}
 
-inject();
-injectSpeedInsights();
+bootstrapApplication(App, appConfig)
+  .then(() => {
+    scheduleIdle(() => {
+      inject();
+      injectSpeedInsights();
+    });
+  })
+  .catch((err) => console.error(err));

@@ -20,7 +20,7 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: "Missing prompt" });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env["GEMINI_API_KEY"];
   if (!apiKey) {
     return res.status(500).json({
       error: "Server is missing GEMINI_API_KEY. Set it in your Vercel/local env.",

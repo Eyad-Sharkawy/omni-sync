@@ -1,8 +1,7 @@
 import {
-  afterNextRender,
   ChangeDetectionStrategy,
   Component,
-  effect,
+  computed,
   inject,
   input,
   signal,
@@ -11,8 +10,17 @@ import { RouterLink, RouterLinkActive } from "@angular/router";
 import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { map } from "rxjs";
+import { startWith } from "rxjs";
+
 import { Auth } from "../../core/services/auth/auth";
 import { LoginPopup } from "../../features/auth/components/login-popup/login-popup";
+
+/** Same predicate as CDK `Breakpoints.Handset` for correct first paint vs `observe()`. */
+function handsetMatchesSync(): boolean {
+  return (
+    typeof globalThis.matchMedia === "function" && globalThis.matchMedia(Breakpoints.Handset).matches
+  );
+}
 
 @Component({
   selector: "os-sidebar",
@@ -21,7 +29,7 @@ import { LoginPopup } from "../../features/auth/components/login-popup/login-pop
   templateUrl: "./sidebar.html",
   styleUrl: "./sidebar.css",
   host: {
-    "[style.--width]": "width()",
+    "[style.--width]": "sidebarWidth()",
   },
 })
 export class Sidebar {
@@ -31,33 +39,26 @@ export class Sidebar {
   readonly isLoginPopupOpen = signal(false);
 
   readonly isOpen = input(true);
-  readonly width = signal<"0rem" | "13.75rem" | "3.75rem" | "75vw">("0rem");
   readonly collapsed = signal(false);
-  private readonly hasMounted = signal(false);
+
   readonly isMobile = toSignal(
-    this.breakPointObserver.observe(Breakpoints.Handset).pipe(map((value) => value.matches)),
-    { initialValue: true },
+    this.breakPointObserver.observe(Breakpoints.Handset).pipe(
+      map((value) => value.matches),
+      startWith(handsetMatchesSync()),
+    ),
+    { initialValue: handsetMatchesSync() },
   );
 
-  constructor() {
-    afterNextRender(() => {
-      this.hasMounted.set(true);
-    });
-
-    effect(() => {
-      if (!this.hasMounted()) {
-        this.width.set("0rem");
-        return;
-      }
-
-      if (!this.isOpen()) {
-        this.width.set("0rem");
-        return;
-      }
-
-      this.width.set(this.isMobile() ? "75vw" : this.collapsed() ? "3.75rem" : "13.75rem");
-    });
-  }
+  /** Derived width avoids 0→full expansion after `afterNextRender`, which heavily inflated CLS. */
+  readonly sidebarWidth = computed((): "0rem" | "13.75rem" | "3.75rem" | "75vw" => {
+    if (!this.isOpen()) {
+      return "0rem";
+    }
+    if (this.isMobile()) {
+      return "75vw";
+    }
+    return this.collapsed() ? "3.75rem" : "13.75rem";
+  });
 
   onToggleCollapse() {
     this.collapsed.update((prev) => !prev);

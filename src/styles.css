@@ -2,6 +2,11 @@
 
 @import "tailwindcss";
 
+/* Reduce layout shift from font metrics vs fallback (pairs with display=optional on Google Fonts). */
+html {
+  font-synthesis: none;
+}
+
 @theme {
   --font-display: "Syne", sans-serif;
   --font-mono: "DM Mono", monospace;
