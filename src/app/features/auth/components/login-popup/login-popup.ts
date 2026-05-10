@@ -306,6 +306,16 @@ export class LoginPopup {
       case "auth/invalid-continue-uri":
       case "auth/missing-continue-uri":
         return "Continue URL is invalid or not authorized in Firebase Authentication settings.";
+      case "auth/argument-error":
+        return (
+          "Google couldn’t start redirect sign-in in this browser (often Chrome tracking prevention or extensions). " +
+          "If it keeps happening, allow popups for this site or relax blocking for localhost/your Vercel URL."
+        );
+      case "auth/google-sign-in-unavailable":
+        return (
+          "This browser blocked both redirect and popup Google sign-in. Turn off strict tracking or ad blocking " +
+          "for this site, allow popups, or try another browser."
+        );
       case "permission-denied":
         return "You're signed in, but your account doesn't have permission to access some data yet.";
       case "unauthenticated":

@@ -1,4 +1,5 @@
 import { inject, Injectable } from "@angular/core";
+import { isSignInWithEmailLink, signInWithEmailLink, signInWithRedirect } from "firebase/auth";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { map } from "rxjs";
 
@@ -44,14 +45,83 @@ export class Auth {
     { initialValue: null },
   );
 
-  async loginWithGoogle() {
+  constructor() {
+    void this.tryCompleteEmailLinkSignIn();
+  }
+
+  /**
+   * Finishes email-link sign-in when the user opens the magic link on this device.
+   * Required by Firebase; without this, the link loads the app but never completes auth.
+   */
+  private async tryCompleteEmailLinkSignIn(): Promise<void> {
+    if (typeof globalThis.window === "undefined") {
+      return;
+    }
+
+    const href = globalThis.window.location.href;
+
+    if (!isSignInWithEmailLink(this.auth, href)) {
+      return;
+    }
+
+    let email = globalThis.localStorage?.getItem(Auth.EMAIL_LINK_STORAGE_KEY)?.trim() ?? "";
+
+    if (!email) {
+      email =
+        globalThis.window.prompt(
+          "Confirm your email to finish signing in (same address the link was sent to).",
+        )?.trim() ?? "";
+    }
+
+    if (!email) {
+      console.warn("Email link sign-in cancelled: no email available.");
+      return;
+    }
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    if (!emailOk) {
+      console.warn("Email link sign-in: invalid stored email format.");
+      return;
+    }
+
+    try {
+      await signInWithEmailLink(this.auth, email, href);
+      globalThis.localStorage?.removeItem(Auth.EMAIL_LINK_STORAGE_KEY);
+
+      const url = new URL(globalThis.window.location.href);
+      url.search = "";
+      globalThis.history?.replaceState({}, "", `${url.pathname}${url.hash}`);
+    } catch (error) {
+      console.error("Email link sign-in failed:", error);
+    }
+  }
+
+  /**
+   * Original working pattern (`194d06b`): **popup first**, then **redirect** if the popup is
+   * blocked or cancelled. Return trip is completed via `getRedirectResult` in `app.config.ts`.
+   */
+  async loginWithGoogle(): Promise<void> {
     const provider = new GoogleAuthProvider();
 
     try {
       await signInWithPopup(this.auth, provider);
-    } catch (error) {
+    } catch (error: unknown) {
+      const code = Auth.authErrorCode(error);
+      if (code === "auth/popup-blocked" || code === "auth/cancelled-popup-request") {
+        await signInWithRedirect(this.auth, provider);
+        throw { code: "auth/redirect-started" };
+      }
       console.error("Login with google failed:", error);
+      throw error;
     }
+  }
+
+  private static authErrorCode(error: unknown): string {
+    if (error && typeof error === "object" && "code" in error) {
+      const c = (error as { code?: unknown }).code;
+      return typeof c === "string" ? c : "";
+    }
+    return "";
   }
 
   async logout() {
