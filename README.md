@@ -1,34 +1,39 @@
 # Omni Sync
 
-Omni Sync is an Angular productivity app that combines a Kanban board and a Calendar view, with Firebase Authentication and Firestore persistence for signed-in users.
+Omni Sync is an Angular productivity app that combines Kanban boards and a calendar view, with Firebase Authentication, Firestore persistence, optional collaborative boards, and Gemini-assisted task metadata.
 
 ## Features
 
-- Kanban boards with columns, tasks, drag-and-drop, and board management
-- Calendar view synced from Kanban tasks
-- Authentication:
-  - Google sign-in (popup with redirect fallback)
-  - Email/password sign-up and sign-in
-  - Email verification flow
+- **Kanban** — Columns, tasks, drag-and-drop, board lifecycle, **shared boards** (invite by username), workspace sync
+- **Calendar** — FullCalendar view backed by the same task data
+- **Profiles** — Username, first and last name stored in Firestore; signed-in users must complete profile before using boards/calendar (route guards + redirect from home after sign-in)
+- **Authentication**
+  - Google sign-in
+  - Email/password sign-up and sign-in (verification where configured)
   - Password reset
   - Email link (passwordless) sign-in
-- Data persistence strategy:
-  - Signed-in users: Firestore (with local cache fallback)
+- **AI (Gemini)** — Server-side `/api/gemini` route suggests task fields from the add-task flow (API key never shipped to the browser)
+- **Data**
+  - Signed-in users: Firestore (`kanban/{uid}`, `users/{uid}`, `usernames/{handle}`, `boardWorkspaces/{boardId}`, …) plus local cache where implemented
   - Guests: localStorage
 
 ## Architecture Overview
 
 ```mermaid
 flowchart TD
-  UI[Angular UI: Navbar / Sidebar / Kanban / Calendar] --> Store[KanbanStore]
+  UI[Angular UI: Navbar / Sidebar / Kanban / Calendar / Profile] --> Store[KanbanStore]
   Store --> Auth[Auth Service]
   Store --> Storage[Storage Service]
+  Store --> Profile[UserProfileService]
 
   Auth --> FirebaseAuth[Firebase Authentication]
-  Storage --> Firestore[(Firestore kanban/{uid})]
-  Storage --> LocalCache[(localStorage cache)]
+  Storage --> Firestore[(Firestore)]
+  Profile --> Firestore
 
-  FirebaseAuth --> Rules[Auth + Firestore Rules]
+  UI --> GeminiHttp[Gemini HTTP client]
+  GeminiHttp --> ApiRoute["/api/gemini (Vercel)"]
+
+  FirebaseAuth --> Rules[Firestore Security Rules]
   Firestore --> Rules
 ```
 
@@ -36,9 +41,10 @@ flowchart TD
 
 - Angular 21
 - Angular CDK
-- AngularFire + Firebase Auth + Firestore
+- AngularFire (Auth, Firestore, Analytics)
 - FullCalendar
 - Tailwind CSS
+- Vercel serverless API route for Gemini (`api/gemini.ts`)
 
 ## Getting Started
 
@@ -48,33 +54,48 @@ flowchart TD
 npm install
 ```
 
-### 2) Run locally
+### 2) Environment files
+
+- **Firebase** — Use `src/environments/environment.development.ts` locally (see `src/environments/enviroment.example.ts`). Production/CI builds can generate `environment.ts` via `set-env.js` when `FIREBASE_*` variables are set.
+- **Gemini (local / Vercel)** — Copy `.env.example` to `.env` in the project root and set `GEMINI_API_KEY`. Do not commit `.env` (it is gitignored).
+
+### 3) Run locally
+
+**Angular only** (UI + Firebase; Gemini HTTP route is not served):
 
 ```bash
 npm start
 ```
 
-App runs at `http://localhost:4200`.
+App: `http://localhost:4200`.
+
+**Full stack** (Angular + Vercel API routes including `/api/gemini`, loads `.env`):
+
+```bash
+npm run dev:vercel
+```
+
+Use `npm run dev` only if you intend the same as `npm start` (both run `ng serve`).
 
 ## Scripts
 
-- `npm start` - Start dev server
-- `npm run build` - Generate environment file from env vars (if present), then build
-- `npm run watch` - Build in watch mode
-- `npm run test` - Run tests
-- `npm run lint` - Run lint checks
-- `npm run format` - Format code
-- `npm run check-all` - Format + lint
+| Script              | Description                                                |
+| ------------------- | ---------------------------------------------------------- |
+| `npm start`         | Dev server (`ng serve`)                                    |
+| `npm run dev`       | Same as `npm start`                                        |
+| `npm run dev:vercel`| Local Vercel dev (app + `/api/*`)                           |
+| `npm run build`     | `set-env.js` then production Angular build                 |
+| `npm run watch`     | Build watch (development configuration)                    |
+| `npm run test`      | Unit tests                                                 |
+| `npm run lint`      | ESLint                                                     |
+| `npm run format`    | Prettier                                                   |
+| `npm run check-all` | Format + lint                                              |
 
-## Environment Configuration
+## Environment Variables
 
-This app expects Firebase web config under `environment.firebaseConfig`.
+### Firebase (CI / Vercel / `set-env.js`)
 
-For local development, keep:
-- `src/environments/environment.ts`
-- `src/environments/environment.development.ts`
-
-For CI/Vercel builds, `set-env.js` can generate `src/environments/environment.ts` from:
+When all are present, `set-env.js` writes `src/environments/environment.ts` at build time:
 
 - `FIREBASE_API_KEY`
 - `FIREBASE_AUTH_DOMAIN`
@@ -84,68 +105,47 @@ For CI/Vercel builds, `set-env.js` can generate `src/environments/environment.ts
 - `FIREBASE_APP_ID`
 - `FIREBASE_MEASUREMENT_ID`
 
-If these vars are missing, generation is skipped and existing files are used.
+If any are missing, generation falls back to existing/example files.
 
-## Firestore Rules (Recommended)
+### Gemini
 
-Current data model stores one document per user in `kanban/{uid}`.
+- **Local:** `.env` with `GEMINI_API_KEY` (used by `api/gemini.ts` via `dotenv` and by `vercel dev`).
+- **Vercel:** Set `GEMINI_API_KEY` in the project’s Environment Variables.
 
-Use:
+## Firestore Security Rules
 
-```txt
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /kanban/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
+Authoritative example for this app’s collections (`users`, `usernames`, `kanban`, `boardWorkspaces`) lives in **`firestore.rules`** at the repo root. Deploy or paste those rules into the Firebase Console.
 
 ## Firebase Auth Setup Checklist
 
-Enable in Firebase Console -> Authentication -> Sign-in method:
-
-- Google
-- Email/Password
-- Email link (passwordless)
-- Phone (optional; requires billing for real SMS)
+In Firebase Console → Authentication → Sign-in method, enable what you use (e.g. Google, Email/Password, Email link).
 
 Also ensure:
+
 - Authorized domains include `localhost` and your production domain
-- Verification and reset email templates are configured
+- Email templates are configured for verification/reset if required
 
 ## Deploying to Vercel
 
-1. Import the repo into Vercel
-2. Add the Firebase environment variables listed above
-3. Deploy
-
-Build command is already configured via npm:
-
-```bash
-npm run build
-```
+1. Import the repository into Vercel.
+2. Configure **Firebase** env vars (see above) for production builds.
+3. Add **`GEMINI_API_KEY`** if you use AI features.
+4. Deploy; build command: `npm run build`.
 
 ## Troubleshooting
 
-- `Could not resolve ../environments/environment`
-  - Ensure `src/environments/environment.ts` exists in repo or env generation runs before build.
+- **`Could not resolve ../environments/environment`**  
+  Ensure `src/environments/environment.ts` exists or your CI runs `set-env.js` with full `FIREBASE_*` vars before `ng build`.
 
-- `auth/popup-blocked`
-  - Browser blocked popup; app falls back to redirect flow.
+- **`GEMINI_API_KEY` / Gemini errors locally**  
+  Use `npm run dev:vercel` so `/api/gemini` runs, or deploy to Vercel; plain `ng serve` does not host serverless routes.
 
-- Firestore empty but app has data
-  - App may be using local fallback due to Firestore permission issues.
-  - Verify Firestore rules and check browser console for `permission-denied`.
+- **`auth/popup-blocked`**  
+  Allow popups or retry; check Firebase authorized domains.
+
+- **Firestore `permission-denied`**  
+  Deploy rules from `firestore.rules` and confirm the user is signed in with the expected `uid`.
 
 ## Notes on Security
 
-Firebase web config values in frontend (`apiKey`, `authDomain`, etc.) are not admin secrets. Security is enforced by:
-
-- Firestore/Storage Security Rules
-- Auth checks
-- App Check (recommended)
-
-Never commit admin credentials or service account keys.
+Firebase web config (`apiKey`, `authDomain`, …) is not a secret; protection comes from **Firestore rules**, **Auth**, and optional **App Check**. Never commit **service account keys**, admin SDK secrets, or **`.env`** with production API keys.
