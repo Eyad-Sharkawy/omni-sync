@@ -6,5 +6,5 @@ export const dateRangeValidator: ValidatorFn = (
   const start = control.get("startDate");
   const due = control.get("dueDate");
 
-  return start && due && start.value > due ? { dataRangeInvalid: true } : null;
+  return start && due && start.value > due ? { dateRangeInvalid: true } : null;
 };

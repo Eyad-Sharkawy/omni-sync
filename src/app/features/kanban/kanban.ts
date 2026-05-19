@@ -70,7 +70,7 @@ export class Kanban {
   private readonly router = inject(Router);
 
   private readonly routeBoardPublicId = toSignal(
-    this.route.paramMap.pipe(map((prams) => prams.get("boardId"))),
+    this.route.paramMap.pipe(map((params) => params.get("boardId"))),
     { initialValue: null },
   );
 

@@ -10,7 +10,6 @@ export interface TaskFormControls {
   description: FormControl<string>;
   priority: PriorityControl;
   column: FormControl<string>;
-  tags: FormControl<string>;
   startDate: FormControl<string>;
   dueDate: FormControl<string>;
 }
@@ -24,7 +23,6 @@ export function createTaskForm(): TaskFormGroup {
       description: createDescriptionControl(),
       priority: createPriorityControl(),
       column: createColumnControl(),
-      tags: createTagsControl(),
       startDate: createStartDate(),
       dueDate: createDueDate(),
     },
@@ -46,10 +44,6 @@ function createPriorityControl(): PriorityControl {
 
 function createColumnControl(): FormControl<string> {
   return new FormControl("", { nonNullable: true, validators: [Validators.required] });
-}
-
-function createTagsControl(): FormControl<string> {
-  return new FormControl("", { nonNullable: true });
 }
 
 function createStartDate(): FormControl<string> {

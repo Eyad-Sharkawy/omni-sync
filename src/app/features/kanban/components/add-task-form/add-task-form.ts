@@ -17,7 +17,7 @@ import { OmniSyncColors } from "../../../../shared/UI/colors";
 import { createTaskForm } from "./task-form.factory";
 import { mapFormToSubmit } from "./task-form.mapper";
 import { patchFormFromTask } from "./task-form.init";
-import { showContorlError } from "../../../../shared/forms/form-utils";
+import { showControlError as checkControlError } from "../../../../shared/forms/form-utils";
 import { TaskTags } from "./components/task-tags/task-tags";
 import { TaskAiFacade } from "./task-ai/task-ai.facade";
 import { AiGenerateField } from "./task-ai/task-ai.types";
@@ -56,7 +56,7 @@ export class AddTaskForm {
 
   protected readonly form = createTaskForm();
 
-  protected readonly showControlError = showContorlError;
+  protected readonly showControlError = checkControlError;
 
   readonly minDueDate = toSignal(this.form.controls.startDate.valueChanges, {
     initialValue: this.form.controls.startDate.value,

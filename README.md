@@ -56,7 +56,7 @@ npm install
 
 ### 2) Environment files
 
-- **Firebase** — Use `src/environments/environment.development.ts` locally (see `src/environments/enviroment.example.ts`). Production/CI builds can generate `environment.ts` via `set-env.js` when `FIREBASE_*` variables are set.
+- **Firebase** — Use `src/environments/environment.development.ts` locally (see `src/environments/environment.example.ts`). Production/CI builds can generate `environment.ts` via `set-env.js` when `FIREBASE_*` variables are set.
 - **Gemini (local / Vercel)** — Copy `.env.example` to `.env` in the project root and set `GEMINI_API_KEY`. Do not commit `.env` (it is gitignored).
 
 ### 3) Run locally

@@ -19,7 +19,7 @@ const firebaseEnv = {
 
 const hasAllVars = Object.values(firebaseEnv).every((value) => !!value);
 const targetPath = "./src/environments/environment.ts";
-const examplePath = "./src/environments/enviroment.example.ts";
+const examplePath = "./src/environments/environment.example.ts";
 
 let envConfigFile = "";
 if (hasAllVars) {

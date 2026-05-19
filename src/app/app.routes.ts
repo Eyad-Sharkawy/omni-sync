@@ -32,7 +32,7 @@ export const routes: Routes = [
       {
         path: "calendar",
         loadChildren: () =>
-          import("./features/calendar/calender.routes").then((mod) => mod.CALENDAR_ROUTES),
+          import("./features/calendar/calendar.routes").then((mod) => mod.CALENDAR_ROUTES),
       },
     ],
   },
