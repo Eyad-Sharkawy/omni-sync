@@ -11,7 +11,7 @@
         type="button"
         (click)="onGenerateAll()"
         [disabled]="generatingAll()"
-        class="text-secondary border-border hover:bg-surface2 disabled:text-muted disabled:cursor-not-allowed cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition"
+        class="text-secondary border-border hover:bg-surface2 disabled:text-muted cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition disabled:cursor-not-allowed"
       >
         {{ generatingAll() ? "Generating..." : "AI: Generate All" }}
       </button>
@@ -27,7 +27,7 @@
       class="os-form-input"
       required
     />
-    @if (titleIsInvalid) {
+    @if (showControlError(form.controls.title)) {
       <p class="text-danger text-sm">Add a title for this task</p>
     }
   </div>
@@ -39,7 +39,7 @@
         type="button"
         (click)="onGenerateDescription()"
         [disabled]="generatingDescription()"
-        class="text-secondary border-border hover:bg-surface2 disabled:text-muted disabled:cursor-not-allowed cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition"
+        class="text-secondary border-border hover:bg-surface2 disabled:text-muted cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition disabled:cursor-not-allowed"
       >
         {{ generatingDescription() ? "Generating..." : "AI: Generate" }}
       </button>
@@ -62,7 +62,7 @@
         type="button"
         (click)="onGeneratePriority()"
         [disabled]="generatingPriority()"
-        class="text-secondary border-border hover:bg-surface2 disabled:text-muted disabled:cursor-not-allowed cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition"
+        class="text-secondary border-border hover:bg-surface2 disabled:text-muted cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition disabled:cursor-not-allowed"
       >
         {{ generatingPriority() ? "Generating..." : "AI: Generate" }}
       </button>
@@ -112,7 +112,7 @@
       </div>
     </div>
 
-    @if (priorityIsInvalid) {
+    @if (showControlError(form.controls.priority)) {
       <p class="text-danger text-sm">Select a priority</p>
     }
   </fieldset>
@@ -133,61 +133,18 @@
       }
     </select>
 
-    @if (columnIsInvalid) {
+    @if (showControlError(form.controls.column)) {
       <p class="text-danger text-sm">Select a column</p>
     }
   </div>
 
-  <div class="flex flex-col gap-1.5">
-    <div class="flex items-center justify-between gap-2">
-      <label for="tags-input" class="os-form-label"> Tags </label>
-      <button
-        type="button"
-        (click)="onGenerateTags()"
-        [disabled]="generatingTags()"
-        class="text-secondary border-border hover:bg-surface2 disabled:text-muted disabled:cursor-not-allowed cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition"
-      >
-        {{ generatingTags() ? "Generating..." : "AI: Generate" }}
-      </button>
-    </div>
-    @if (selectedTags().length !== 0) {
-      <div
-        class="mb-3 flex flex-wrap gap-1.5"
-        cdkDropList
-        cdkDropListOrientation="horizontal"
-        [cdkDropListData]="selectedTags()"
-        (cdkDropListDropped)="onDropTag($event)"
-      >
-        @for (tag of selectedTags(); track tag.id) {
-          <os-task-tag
-            removeButton="true"
-            [color]="tag.color"
-            (click)="onTagClick(tag.id)"
-            (remove)="removeTag(tag.id)"
-            class="cursor-pointer select-none"
-            cdkDrag
-            (cdkDragStarted)="onDragStarted()"
-            (cdkDragEnded)="onDragEnded()"
-            [cdkDragData]="tag.id"
-          >
-            {{ tag.text }}
-          </os-task-tag>
-        }
-      </div>
-    }
-
-    <input
-      formControlName="tags"
-      (keydown.enter)="onTagEnter($event)"
-      type="text"
-      inputmode="text"
-      enterkeyhint="done"
-      autocomplete="off"
-      id="tags-input"
-      placeholder="Add tag..."
-      class="os-form-input"
-    />
-  </div>
+  <os-task-tags
+    [tags]="selectedTags()"
+    [accentColor]="color()"
+    [generating]="generatingTags()"
+    (generateRequested)="onGenerateTags()"
+    (tagsChange)="selectedTags.set($event)"
+  />
 
   <div class="flex flex-col gap-1.5">
     <label for="start-date-input" class="os-form-label"> Start Date </label>
@@ -199,7 +156,7 @@
       required
     />
 
-    @if (startDateIsInvalid) {
+    @if (showControlError(form.controls.startDate)) {
       <p class="text-danger text-sm">select a valid start date</p>
     }
   </div>
@@ -211,7 +168,7 @@
         type="button"
         (click)="onGenerateDueDate()"
         [disabled]="generatingDueDate()"
-        class="text-secondary border-border hover:bg-surface2 disabled:text-muted disabled:cursor-not-allowed cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition"
+        class="text-secondary border-border hover:bg-surface2 disabled:text-muted cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition disabled:cursor-not-allowed"
       >
         {{ generatingDueDate() ? "Generating..." : "AI: Generate" }}
       </button>
@@ -225,7 +182,7 @@
       required
     />
 
-    @if (dueDateIsInvalid) {
+    @if (showControlError(form.controls.dueDate)) {
       <p class="text-danger text-sm">select a valid due date</p>
     }
   </div>

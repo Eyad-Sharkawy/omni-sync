@@ -1,0 +1,49 @@
+<div class="flex flex-col gap-1.5">
+  <div class="flex items-center justify-between gap-2">
+    <label for="tags-input" class="os-form-label">Tags</label>
+    <button
+      type="button"
+      (click)="generateRequested.emit()"
+      [disabled]="generating()"
+      class="text-secondary border-border hover:bg-surface2 disabled:text-muted cursor-pointer rounded-md border px-2 py-1 text-[11px] font-medium transition disabled:cursor-not-allowed"
+    >
+      {{ generating() ? "Generating..." : "AI: Generate" }}
+    </button>
+  </div>
+
+  @if (tags().length !== 0) {
+    <div
+      class="mb-3 flex flex-wrap gap-1.5"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="tags()"
+      (cdkDropListDropped)="onDropTag($event)"
+    >
+      @for (tag of tags(); track tag.id) {
+        <os-task-tag
+          removeButton="true"
+          [color]="tag.color"
+          (click)="onTagClick(tag.id)"
+          (remove)="removeTag(tag.id)"
+          class="cursor-pointer select-none"
+          cdkDrag
+          (cdkDragStarted)="onDragStarted()"
+          (cdkDragEnded)="onDragEnded()"
+          [cdkDragData]="tag.id"
+        >
+          {{ tag.text }}
+        </os-task-tag>
+      }
+    </div>
+  }
+
+  <input
+    [formControl]="tagInput"
+    (keydown.enter)="onTagEnter($event)"
+    type="text"
+    id="tags-input"
+    placeholder="Add tag..."
+    class="os-form-input"
+    autocomplete="off"
+  />
+</div>

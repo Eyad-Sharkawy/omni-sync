@@ -25,13 +25,25 @@ describe("AddTaskForm", () => {
     startDate: new Date("2026-04-01"),
     dueDate: new Date("2026-04-02"),
   };
+  const columnDone = {
+    id: "column-2",
+    header: "Done",
+    color: "green" as const,
+    boardId: "board-1",
+    tasksIds: [] as string[],
+  };
   const kanbanStoreMock = {
-    currentColumns: signal([column]),
+    currentColumns: signal([column, columnDone]),
     tasks: signal([task]),
-    getColumnById: vi.fn((columnId: string) => (columnId === column.id ? column : undefined)),
+    getColumnById: vi.fn((columnId: string) => {
+      if (columnId === column.id) return column;
+      if (columnId === columnDone.id) return columnDone;
+      return undefined;
+    }),
     hasTaskInColumn: vi.fn(() => true),
     updateTask: vi.fn(),
     addTaskToColumn: vi.fn(),
+    moveTask: vi.fn(),
   };
   const geminiMock = {
     generateTaskMetadata: vi.fn(),
@@ -43,6 +55,7 @@ describe("AddTaskForm", () => {
     kanbanStoreMock.hasTaskInColumn.mockReturnValue(true);
     kanbanStoreMock.updateTask.mockClear();
     kanbanStoreMock.addTaskToColumn.mockClear();
+    kanbanStoreMock.moveTask.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [AddTaskForm],
@@ -77,7 +90,6 @@ describe("AddTaskForm", () => {
 
     component.onSubmit();
 
-    expect(kanbanStoreMock.hasTaskInColumn).toHaveBeenCalledWith(column.id, task.id);
     expect(kanbanStoreMock.updateTask).toHaveBeenCalledWith(
       task.id,
       expect.objectContaining({
@@ -87,6 +99,33 @@ describe("AddTaskForm", () => {
         dueDate: new Date("2026-04-04"),
       }),
     );
+    expect(kanbanStoreMock.moveTask).not.toHaveBeenCalled();
+    expect(kanbanStoreMock.addTaskToColumn).not.toHaveBeenCalled();
+  });
+
+  it("moves the task when the column changes in edit mode", async () => {
+    fixture.componentRef.setInput("initialInfo", { columnId: column.id, taskId: task.id });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const form = (component as AddTaskForm & { form: AddTaskForm["form"] }).form;
+
+    form.controls.title.setValue("Moved task");
+    form.controls.column.setValue(columnDone.id);
+    form.controls.priority.setValue("high");
+    form.controls.startDate.setValue("2026-04-03");
+    form.controls.dueDate.setValue("2026-04-04");
+
+    component.onSubmit();
+
+    expect(kanbanStoreMock.moveTask).toHaveBeenCalledWith(
+      task.id,
+      column.id,
+      columnDone.id,
+      0,
+      0,
+    );
+    expect(kanbanStoreMock.updateTask).toHaveBeenCalled();
     expect(kanbanStoreMock.addTaskToColumn).not.toHaveBeenCalled();
   });
 });

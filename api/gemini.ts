@@ -3,9 +3,9 @@ import { GoogleGenAI } from "@google/genai";
 
 loadEnv();
 
-type JsonBody = {
+interface JsonBody {
   prompt?: unknown;
-};
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {

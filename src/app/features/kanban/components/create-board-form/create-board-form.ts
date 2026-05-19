@@ -14,6 +14,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angula
 
 import { KanbanStore } from "../../services/kanban-store";
 import { UserProfileService } from "../../../../core/services/user-profile/user-profile";
+import { todayISO } from "../../../../shared/forms/form-utils";
+import { dateRangeValidator } from "../../../../shared/forms/form-validators";
 
 @Component({
   selector: "os-create-board-form",
@@ -30,22 +32,27 @@ export class CreateBoardForm {
   readonly closed = output<void>();
   readonly created = output<string>();
 
-  protected form = new FormGroup({
-    name: new FormControl("", {
-      validators: [Validators.required],
-    }),
-    startDate: new FormControl(new Date().toISOString().split("T")[0], {
-      validators: [Validators.required],
-    }),
-    dueDate: new FormControl("", {
-      validators: [Validators.required],
-    }),
-  });
+  protected form = new FormGroup(
+    {
+      name: new FormControl("", {
+        validators: [Validators.required],
+      }),
+      startDate: new FormControl(todayISO(), {
+        validators: [Validators.required],
+      }),
+      dueDate: new FormControl("", {
+        validators: [Validators.required],
+      }),
+    },
+    {
+      validators: dateRangeValidator,
+    },
+  );
 
   protected readonly shareUsername = new FormControl("");
 
   readonly minDueDate = toSignal(this.form.controls.startDate.valueChanges, {
-    initialValue: new Date().toISOString().split("T")[0],
+    initialValue: todayISO(),
   });
 
   readonly shareFeedback = signal<string | null>(null);
