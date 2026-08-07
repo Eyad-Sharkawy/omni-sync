@@ -33,14 +33,7 @@ interface ModalTaskInfo {
 
 @Component({
   selector: "os-calendar",
-  imports: [
-    CommonModule,
-    FullCalendarModule,
-    ViewBoardsModal,
-    Modal,
-    AddTaskForm,
-    TaskExpandBody,
-  ],
+  imports: [CommonModule, FullCalendarModule, ViewBoardsModal, Modal, AddTaskForm, TaskExpandBody],
   templateUrl: "./calendar.html",
   styleUrl: "./calendar.css",
 })
@@ -189,11 +182,7 @@ export class Calendar {
       const taskId = info.event.extendedProps["taskId"] as string | undefined;
       const columnId = info.event.extendedProps["columnId"] as string | undefined;
 
-      if (
-        taskId &&
-        columnId &&
-        this.kanbanStore.hasTaskInColumn(columnId, taskId)
-      ) {
+      if (taskId && columnId && this.kanbanStore.hasTaskInColumn(columnId, taskId)) {
         this.taskViewInfo.set({ columnId, taskId });
       }
     },
@@ -317,10 +306,7 @@ export class Calendar {
       return;
     }
 
-    if (
-      taskInfo.taskId &&
-      !this.kanbanStore.hasTaskInColumn(taskInfo.columnId, taskInfo.taskId)
-    ) {
+    if (taskInfo.taskId && !this.kanbanStore.hasTaskInColumn(taskInfo.columnId, taskInfo.taskId)) {
       return;
     }
 

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  signal,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { BreakpointObserver, Breakpoints } from "@angular/cdk/layout";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -18,7 +11,8 @@ import { LoginPopup } from "../../features/auth/components/login-popup/login-pop
 /** Same predicate as CDK `Breakpoints.Handset` for correct first paint vs `observe()`. */
 function handsetMatchesSync(): boolean {
   return (
-    typeof globalThis.matchMedia === "function" && globalThis.matchMedia(Breakpoints.Handset).matches
+    typeof globalThis.matchMedia === "function" &&
+    globalThis.matchMedia(Breakpoints.Handset).matches
   );
 }
 

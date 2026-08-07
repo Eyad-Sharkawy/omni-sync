@@ -79,17 +79,17 @@ Use `npm run dev` only if you intend the same as `npm start` (both run `ng serve
 
 ## Scripts
 
-| Script              | Description                                                |
-| ------------------- | ---------------------------------------------------------- |
-| `npm start`         | Dev server (`ng serve`)                                    |
-| `npm run dev`       | Same as `npm start`                                        |
-| `npm run dev:vercel`| Local Vercel dev (app + `/api/*`)                           |
-| `npm run build`     | `set-env.js` then production Angular build                 |
-| `npm run watch`     | Build watch (development configuration)                    |
-| `npm run test`      | Unit tests                                                 |
-| `npm run lint`      | ESLint                                                     |
-| `npm run format`    | Prettier                                                   |
-| `npm run check-all` | Format + lint                                              |
+| Script               | Description                                |
+| -------------------- | ------------------------------------------ |
+| `npm start`          | Dev server (`ng serve`)                    |
+| `npm run dev`        | Same as `npm start`                        |
+| `npm run dev:vercel` | Local Vercel dev (app + `/api/*`)          |
+| `npm run build`      | `set-env.js` then production Angular build |
+| `npm run watch`      | Build watch (development configuration)    |
+| `npm run test`       | Unit tests                                 |
+| `npm run lint`       | ESLint                                     |
+| `npm run format`     | Prettier                                   |
+| `npm run check-all`  | Format + lint                              |
 
 ## Environment Variables
 

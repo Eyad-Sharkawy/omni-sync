@@ -47,7 +47,9 @@ export const environment = {
 `;
 } else if (fs.existsSync(examplePath)) {
   envConfigFile = fs.readFileSync(examplePath, "utf8");
-  console.log("set-env: FIREBASE_* vars missing. Generated environment.ts from enviroment.example.ts");
+  console.log(
+    "set-env: FIREBASE_* vars missing. Generated environment.ts from enviroment.example.ts",
+  );
 } else {
   envConfigFile = `
 export const environment = {

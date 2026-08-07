@@ -14,8 +14,7 @@ export const routes: Routes = [
   },
   {
     path: "profile",
-    loadComponent: () =>
-      import("./features/profile/profile").then((m) => m.ProfilePage),
+    loadComponent: () => import("./features/profile/profile").then((m) => m.ProfilePage),
     canActivate: [requireAuthGuard],
     title: "Profile - Omni Sync",
   },

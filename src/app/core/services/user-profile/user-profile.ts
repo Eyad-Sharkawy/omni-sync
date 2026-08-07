@@ -96,7 +96,11 @@ export class UserProfileService {
       const batch = writeBatch(this.firestore);
 
       if (current?.username && normalizeUsername(current.username) !== normalized) {
-        const oldUsernameRef = doc(this.firestore, USERNAMES_COLLECTION, normalizeUsername(current.username));
+        const oldUsernameRef = doc(
+          this.firestore,
+          USERNAMES_COLLECTION,
+          normalizeUsername(current.username),
+        );
         batch.delete(oldUsernameRef);
       }
 
@@ -160,5 +164,4 @@ export class UserProfileService {
       return null;
     }
   }
-
 }

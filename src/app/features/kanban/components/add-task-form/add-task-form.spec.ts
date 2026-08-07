@@ -118,13 +118,7 @@ describe("AddTaskForm", () => {
 
     component.onSubmit();
 
-    expect(kanbanStoreMock.moveTask).toHaveBeenCalledWith(
-      task.id,
-      column.id,
-      columnDone.id,
-      0,
-      0,
-    );
+    expect(kanbanStoreMock.moveTask).toHaveBeenCalledWith(task.id, column.id, columnDone.id, 0, 0);
     expect(kanbanStoreMock.updateTask).toHaveBeenCalled();
     expect(kanbanStoreMock.addTaskToColumn).not.toHaveBeenCalled();
   });

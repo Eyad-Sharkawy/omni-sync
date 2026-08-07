@@ -51,7 +51,9 @@ export class Gemini {
       contextLines.push(`Column / list name: ${context.columnLabel.trim()}`);
     }
     if (context?.existingDescription?.trim()) {
-      contextLines.push(`Existing description (keep facts, language, and tone aligned with this when improving):\n${context.existingDescription.trim()}`);
+      contextLines.push(
+        `Existing description (keep facts, language, and tone aligned with this when improving):\n${context.existingDescription.trim()}`,
+      );
     }
     if (context?.existingPriority) {
       contextLines.push(`Current priority selection: ${context.existingPriority}`);

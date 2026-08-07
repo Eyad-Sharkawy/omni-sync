@@ -113,7 +113,9 @@ export class Storage {
     );
   }
 
-  async getKanbanForUser(userId: string): Promise<{ boards: Board[]; columns: Column[]; tasks: Task[] }> {
+  async getKanbanForUser(
+    userId: string,
+  ): Promise<{ boards: Board[]; columns: Column[]; tasks: Task[] }> {
     try {
       const snapshot = await getDoc(doc(this.firestore, this.KANBAN_COLLECTION, userId));
       let hydrated: { boards: Board[]; columns: Column[]; tasks: Task[] };
@@ -278,7 +280,9 @@ export class Storage {
     return { boards, columns, tasks };
   }
 
-  private getUserKanbanCache(userId: string): { boards: Board[]; columns: Column[]; tasks: Task[] } | null {
+  private getUserKanbanCache(
+    userId: string,
+  ): { boards: Board[]; columns: Column[]; tasks: Task[] } | null {
     const raw = this.localStorage.getItem(this.getUserBoardsKey(userId));
     if (!raw) {
       return null;
@@ -296,8 +300,16 @@ export class Storage {
     }
   }
 
-  private setUserKanbanCache(userId: string, boards: Board[], columns: Column[], tasks: Task[]): void {
-    this.localStorage.setItem(this.getUserBoardsKey(userId), JSON.stringify({ boards, columns, tasks }));
+  private setUserKanbanCache(
+    userId: string,
+    boards: Board[],
+    columns: Column[],
+    tasks: Task[],
+  ): void {
+    this.localStorage.setItem(
+      this.getUserBoardsKey(userId),
+      JSON.stringify({ boards, columns, tasks }),
+    );
   }
 
   private getUserBoardsKey(userId: string): string {
@@ -403,7 +415,9 @@ export class Storage {
     let effectiveBoard = board;
     if (!(board.memberIds && board.memberIds.length > 0)) {
       try {
-        const existingSnap = await getDoc(doc(this.firestore, this.BOARD_WORKSPACES_COLLECTION, board.id));
+        const existingSnap = await getDoc(
+          doc(this.firestore, this.BOARD_WORKSPACES_COLLECTION, board.id),
+        );
         if (existingSnap.exists()) {
           const existing = existingSnap.data() as { memberIds?: string[] };
           if (Array.isArray(existing.memberIds) && existing.memberIds.length > 0) {

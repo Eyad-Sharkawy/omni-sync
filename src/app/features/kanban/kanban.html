@@ -162,11 +162,7 @@
     </os-modal>
   }
   @case ("addBoard") {
-    <os-modal
-      [title]="boardModalTitle()"
-      color="indigo"
-      (closed)="closeModal()"
-    >
+    <os-modal [title]="boardModalTitle()" color="indigo" (closed)="closeModal()">
       <os-create-board-form
         [selectedBoardId]="editBoardModalId()"
         (created)="onBoardCreated($event)"

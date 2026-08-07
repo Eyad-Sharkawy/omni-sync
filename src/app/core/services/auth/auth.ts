@@ -68,9 +68,9 @@ export class Auth {
 
     if (!email) {
       email =
-        globalThis.window.prompt(
-          "Confirm your email to finish signing in (same address the link was sent to).",
-        )?.trim() ?? "";
+        globalThis.window
+          .prompt("Confirm your email to finish signing in (same address the link was sent to).")
+          ?.trim() ?? "";
     }
 
     if (!email) {

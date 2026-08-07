@@ -64,7 +64,9 @@ export class ViewBoardsModal {
   private async refreshOwnerLabels(shared: Board[]): Promise<void> {
     const uids = [
       ...new Set(
-        shared.map((b) => b.sharedFromOwnerId).filter((x): x is string => typeof x === "string" && x.length > 0),
+        shared
+          .map((b) => b.sharedFromOwnerId)
+          .filter((x): x is string => typeof x === "string" && x.length > 0),
       ),
     ];
 

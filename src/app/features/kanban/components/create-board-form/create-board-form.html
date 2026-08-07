@@ -56,11 +56,15 @@
       <div class="flex flex-col gap-2">
         <p class="os-form-label mb-0">Share with</p>
         <p class="text-muted text-xs leading-snug">
-          Invite someone by their profile username. They will see this board under “Shared with you”.
+          Invite someone by their profile username. They will see this board under “Shared with
+          you”.
         </p>
 
         @if (shareFeedback(); as msg) {
-          <p class="text-secondary bg-surface2 border-border rounded-lg border px-3 py-2 text-sm" role="status">
+          <p
+            class="text-secondary bg-surface2 border-border rounded-lg border px-3 py-2 text-sm"
+            role="status"
+          >
             {{ msg }}
           </p>
         }
@@ -85,7 +89,9 @@
 
         @if (memberIdsForEdit().length > 0) {
           <p class="text-secondary mt-1 text-xs font-semibold tracking-wide">Shared with</p>
-          <ul class="border-border bg-surface2/50 max-h-40 space-y-1.5 overflow-y-auto rounded-lg border p-2">
+          <ul
+            class="border-border bg-surface2/50 max-h-40 space-y-1.5 overflow-y-auto rounded-lg border p-2"
+          >
             @for (uid of memberIdsForEdit(); track uid) {
               <li class="text-secondary flex items-center justify-between gap-2 text-sm">
                 <span class="min-w-0 truncate">{{ memberLabel(uid) }}</span>

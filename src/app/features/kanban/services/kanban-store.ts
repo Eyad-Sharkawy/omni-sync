@@ -144,8 +144,13 @@ export class KanbanStore {
       if (currentUser) {
         const collaborativeBoard = this.getCurrentBoardInState(kanban);
         if (collaborativeBoard) {
-          const currentFingerprint = this.workspaceFingerprintFromState(kanban, collaborativeBoard.id);
-          const lastRemoteFingerprint = this.lastRemoteWorkspaceFingerprints.get(collaborativeBoard.id);
+          const currentFingerprint = this.workspaceFingerprintFromState(
+            kanban,
+            collaborativeBoard.id,
+          );
+          const lastRemoteFingerprint = this.lastRemoteWorkspaceFingerprints.get(
+            collaborativeBoard.id,
+          );
           if (currentFingerprint && currentFingerprint === lastRemoteFingerprint) {
             return;
           }
@@ -204,8 +209,7 @@ export class KanbanStore {
       if (!board) {
         return;
       }
-      const collaborative =
-        Boolean(board.sharedFromOwnerId) || (board.memberIds?.length ?? 0) > 0;
+      const collaborative = Boolean(board.sharedFromOwnerId) || (board.memberIds?.length ?? 0) > 0;
       if (!collaborative) {
         return;
       }
@@ -234,8 +238,7 @@ export class KanbanStore {
           }
           const ownerId = typeof data["ownerId"] === "string" ? (data["ownerId"] as string) : "";
           const existingBoard = this._kanban().boards.find((b) => b.id === boardId);
-          const sharedFromOwnerId =
-            ownerId && ownerId !== user.uid ? ownerId : undefined;
+          const sharedFromOwnerId = ownerId && ownerId !== user.uid ? ownerId : undefined;
 
           const parsed = this.storage.parseBoardWorkspaceDocument(data, {
             existingBoard: existingBoard,
@@ -285,7 +288,9 @@ export class KanbanStore {
     const user = this.auth.currentUser();
     this.isHydrating.set(true);
     try {
-      const kanban = user ? await this.storage.getKanbanForUser(user.uid) : this.storage.getKanban();
+      const kanban = user
+        ? await this.storage.getKanbanForUser(user.uid)
+        : this.storage.getKanban();
       this._kanban.set(kanban);
 
       const storedBoardId = this.getStoredCurrentBoardId();
@@ -340,7 +345,12 @@ export class KanbanStore {
     if (typeof raw === "number") {
       return raw;
     }
-    if (raw && typeof raw === "object" && "toDate" in raw && typeof (raw as { toDate: unknown }).toDate === "function") {
+    if (
+      raw &&
+      typeof raw === "object" &&
+      "toDate" in raw &&
+      typeof (raw as { toDate: unknown }).toDate === "function"
+    ) {
       return (raw as { toDate: () => Date }).toDate().getTime();
     }
     return NaN;
@@ -364,10 +374,7 @@ export class KanbanStore {
           ...state,
           boards: state.boards.map((b) => (b.id === boardId ? boardOut : b)),
           columns: [...state.columns.filter((c) => c.boardId !== boardId), ...parsed.columns],
-          tasks: [
-            ...state.tasks.filter((t) => !oldColumnIds.has(t.columnId)),
-            ...parsed.tasks,
-          ],
+          tasks: [...state.tasks.filter((t) => !oldColumnIds.has(t.columnId)), ...parsed.tasks],
         };
       });
     } finally {
@@ -731,9 +738,7 @@ export class KanbanStore {
   /**
    * Collaborator stops seeing a board shared with them (removes self from workspace `memberIds`).
    */
-  async leaveSharedBoard(
-    boardId: string,
-  ): Promise<{ ok: true } | { ok: false; message: string }> {
+  async leaveSharedBoard(boardId: string): Promise<{ ok: true } | { ok: false; message: string }> {
     const user = this.auth.currentUser();
     if (!user) {
       return { ok: false, message: "Sign in to leave a shared board." };

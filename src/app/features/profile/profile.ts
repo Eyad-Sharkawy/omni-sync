@@ -1,10 +1,5 @@
 import { Component, effect, inject, signal } from "@angular/core";
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 
 import { UserProfileService } from "../../core/services/user-profile/user-profile";
 import { isValidUsername } from "../../core/models/user-profile";

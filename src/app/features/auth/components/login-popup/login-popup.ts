@@ -209,7 +209,9 @@ export class LoginPopup {
     this.successMessage.set("");
     try {
       await this.auth.sendEmailLinkSignIn(emailControl.value);
-      this.successMessage.set("Magic link sent. Check your email and open the link on this device.");
+      this.successMessage.set(
+        "Magic link sent. Check your email and open the link on this device.",
+      );
     } catch (error) {
       this.errorMessage.set(this.resolveAuthError(error));
     } finally {
